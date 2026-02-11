@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BEST PRICE©</title>
+    <title>BEST PRICE© — Producto</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
 
@@ -13,10 +13,8 @@
       <div class="topbar__inner">
         <a class="brand" href="index.html">BEST PRICE©</a>
 
-        <!-- BUSCADOR (lupa al medio) -->
         <div class="topsearch" role="search">
           <button class="topsearch__icon" type="button" aria-label="Buscar">
-            <!-- lupa -->
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M10.5 3a7.5 7.5 0 1 1 0 15A7.5 7.5 0 0 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Zm7.7 12.3 2.9 2.9a1 1 0 0 1-1.4 1.4l-2.9-2.9a1 1 0 0 1 1.4-1.4Z"
@@ -36,7 +34,7 @@
         </div>
 
         <nav class="topnav" aria-label="Navegación principal">
-          <a href="index.html" class="topnav__link is-active">Home</a>
+          <a href="index.html" class="topnav__link">Home</a>
           <a href="productos.html" class="topnav__link">Productos</a>
           <a href="#" class="topnav__link" onclick="return false;">Ayuda</a>
         </nav>
@@ -49,34 +47,10 @@
 
     <!-- MAIN -->
     <main class="page">
-      <!-- HERO = CARRUSEL (fondos generados, NO fotos de productos) -->
-      <section class="heroNZXT" id="hero">
-        <div class="heroCarousel" id="heroCarousel" aria-label="Carrusel principal">
-          <button class="heroCarousel__btn heroCarousel__btn--prev" id="heroPrev" type="button" aria-label="Anterior">
-            ‹
-          </button>
-
-          <button class="heroCarousel__btn heroCarousel__btn--next" id="heroNext" type="button" aria-label="Siguiente">
-            ›
-          </button>
-
-          <div class="heroCarousel__dots" id="heroDots" aria-label="Paginación del carrusel"></div>
-        </div>
+      <section class="productDetail" id="productDetail">
+        <!-- Se rellena por JS según ?id= -->
       </section>
-
-      <!-- NOVEDADES -->
-       <!-- NOVEDADES -->
-<section class="section section--featured">
-  <div class="section__head">
-    <h2 class="section__title">Conocé nuestros productos destacados</h2>
-    <p class="section__subtitle">
-      Selección especial con los mejores precios y ofertas del momento
-    </p>
-  </div>
-
-  <div class="cardsGrid" id="productGrid"></div>
-</section>
-
+    </main>
 
     <!-- FOOTER -->
     <footer class="footer">

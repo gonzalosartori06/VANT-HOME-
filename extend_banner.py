@@ -2,131 +2,143 @@
 """
 extend_banner.py
 
-Extiende una imagen para que encaje en un tamaño objetivo (ancho/alto) SIN recortar el contenido.
-Rellena los “huecos” duplicando/estirando los bordes (edge-stretch) y aplica un feather muy suave
-solo en la zona extendida para que no se note el corte.
+Genera banners con tamaño fijo SIN estirar la imagen (contain),
+rellenando lo que sobra con el color detectado del fondo.
 
-Uso:
-  python3 extend_banner.py input.png output.png --w 1920 --h 520
-  python3 extend_banner.py input.png output.png --ratio 16:9 --w 1920
+MEJORA CLAVE:
+- Detecta el color de fondo por "color dominante" en bordes/esquinas (con cuantización),
+  mucho más preciso que la mediana simple.
 
-Notas:
-- No hace blur sobre la imagen principal; solo sobre las bandas extendidas.
-- Ideal para banners de carrusel donde usás background-size: cover y querés cero zoom/crop.
+- Borra el archivo de salida si ya existe.
+- No usa blur.
 """
 
 from __future__ import annotations
+
+import os
 import argparse
-from PIL import Image, ImageFilter
+from collections import defaultdict
+from PIL import Image
 
-def _feather_mask(size: tuple[int,int], inner_rect: tuple[int,int,int,int], feather: int) -> Image.Image:
-    """Máscara (L) con 255 dentro de inner_rect, y degradado a 0 hacia afuera."""
-    w, h = size
-    mask = Image.new("L", (w, h), 0)
-    x0, y0, x1, y1 = inner_rect
-    # base sólida
-    solid = Image.new("L", (max(1, x1-x0), max(1, y1-y0)), 255)
-    mask.paste(solid, (x0, y0))
-    if feather > 0:
-        mask = mask.filter(ImageFilter.GaussianBlur(radius=feather))
-    return mask
 
-def extend_image_to_size(
+def detect_background_color(
     img: Image.Image,
-    target_w: int,
-    target_h: int,
-    *,
-    feather: int = 18,
-    bg_fallback=(243,243,243)
-) -> Image.Image:
+    alpha_min: int = 220,
+    edge_frac: float = 0.10,
+    max_edge_px: int = 70,
+    quant_step: int = 12,
+) -> tuple[int, int, int]:
     """
-    Escala la imagen con 'contain' (sin recorte) y rellena el resto extendiendo bordes.
+    Detecta el color de fondo probable desde bordes/esquinas usando:
+    - muestreo de tiras en los 4 bordes + 4 esquinas
+    - cuantización (bucket) y elección del color dominante (modo)
+    - promedio real dentro del bucket ganador para más precisión
+
+    Params:
+      alpha_min  : ignora píxeles con alpha < alpha_min (para PNG con transparencias)
+      edge_frac  : porcentaje del ancho/alto a muestrear (0.10 = 10%)
+      max_edge_px: límite absoluto en px para no muestrear demasiado
+      quant_step : tamaño del bucket por canal (más chico = más preciso, más grande = más robusto)
     """
+    rgba = img.convert("RGBA")
+    w, h = rgba.size
+    px = rgba.load()
+
+    # grosor de muestreo
+    ew = max(6, min(max_edge_px, int(w * edge_frac)))
+    eh = max(6, min(max_edge_px, int(h * edge_frac)))
+
+    # recolecta samples
+    samples: list[tuple[int, int, int]] = []
+
+    def add_rect(x0: int, y0: int, x1: int, y1: int):
+        # recorta por seguridad
+        x0 = max(0, x0); y0 = max(0, y0)
+        x1 = min(w, x1); y1 = min(h, y1)
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                r, g, b, a = px[x, y]
+                if a >= alpha_min:
+                    samples.append((r, g, b))
+
+    # 4 esquinas
+    add_rect(0, 0, ew, eh)
+    add_rect(w - ew, 0, w, eh)
+    add_rect(0, h - eh, ew, h)
+    add_rect(w - ew, h - eh, w, h)
+
+    # 4 bordes (tiras)
+    add_rect(0, 0, w, eh)         # top
+    add_rect(0, h - eh, w, h)     # bottom
+    add_rect(0, 0, ew, h)         # left
+    add_rect(w - ew, 0, w, h)     # right
+
+    if not samples:
+        return (243, 243, 243)
+
+    # bucket por cuantización: (r//step, g//step, b//step)
+    buckets_count = defaultdict(int)
+    buckets_sum = defaultdict(lambda: [0, 0, 0])
+
+    def q(v: int) -> int:
+        return v // quant_step
+
+    for r, g, b in samples:
+        key = (q(r), q(g), q(b))
+        buckets_count[key] += 1
+        s = buckets_sum[key]
+        s[0] += r; s[1] += g; s[2] += b
+
+    # bucket dominante (modo)
+    best_key = max(buckets_count.items(), key=lambda kv: kv[1])[0]
+    cnt = buckets_count[best_key]
+    sr, sg, sb = buckets_sum[best_key]
+    return (int(sr / cnt), int(sg / cnt), int(sb / cnt))
+
+
+def extend_image(img: Image.Image, tw: int, th: int) -> Image.Image:
     img = img.convert("RGBA")
     ow, oh = img.size
-    tw, th = int(target_w), int(target_h)
 
-    # 1) Resize tipo contain
     scale = min(tw / ow, th / oh)
     rw, rh = max(1, int(round(ow * scale))), max(1, int(round(oh * scale)))
     main = img.resize((rw, rh), Image.LANCZOS)
 
-    # 2) Canvas
-    canvas = Image.new("RGBA", (tw, th), (*bg_fallback, 255))
+    bg = detect_background_color(img)
+    canvas = Image.new("RGBA", (tw, th), (*bg, 255))
+
     px = (tw - rw) // 2
     py = (th - rh) // 2
     canvas.paste(main, (px, py), main)
-
-    # 3) Extender bordes (edge-stretch)
-    # Left band
-    if px > 0:
-        strip = main.crop((0, 0, 1, rh)).resize((px, rh), Image.NEAREST)
-        canvas.paste(strip, (0, py), strip)
-    # Right band
-    rx = px + rw
-    if rx < tw:
-        strip = main.crop((rw-1, 0, rw, rh)).resize((tw-rx, rh), Image.NEAREST)
-        canvas.paste(strip, (rx, py), strip)
-
-    # Top band (incluye laterales ya extendidos)
-    if py > 0:
-        top_row = canvas.crop((0, py, tw, py+1)).resize((tw, py), Image.NEAREST)
-        canvas.paste(top_row, (0, 0), top_row)
-    # Bottom band
-    by = py + rh
-    if by < th:
-        bottom_row = canvas.crop((0, by-1, tw, by)).resize((tw, th-by), Image.NEAREST)
-        canvas.paste(bottom_row, (0, by), bottom_row)
-
-    # 4) Feather suave SOLO fuera del área principal (para disimular seams)
-    if feather > 0:
-        blurred = canvas.filter(ImageFilter.GaussianBlur(radius=feather))
-        # máscara: 255 dentro del main, 0 fuera (con feather para transición)
-        mask = _feather_mask((tw, th), (px, py, px+rw, py+rh), feather)
-        # Queremos: main nítida, fuera ligeramente suavizado
-        # Usamos invert mask para aplicar blur fuera
-        inv = Image.eval(mask, lambda v: 255 - v)
-        out = Image.composite(blurred, canvas, inv)
-        return out
-
     return canvas
 
-def parse_ratio(s: str) -> tuple[int,int]:
-    s = s.strip().lower().replace(" ", "")
-    if ":" not in s:
-        raise ValueError("ratio debe ser como 16:9 o 21:9")
-    a, b = s.split(":")
-    return int(a), int(b)
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("inp")
     ap.add_argument("out")
-    ap.add_argument("--w", type=int, default=None, help="ancho objetivo")
-    ap.add_argument("--h", type=int, default=None, help="alto objetivo")
-    ap.add_argument("--ratio", type=str, default=None, help="ratio objetivo ej 16:9")
-    ap.add_argument("--feather", type=int, default=18, help="suavizado de unión (solo bordes extendidos)")
+    ap.add_argument("--w", type=int, required=True)
+    ap.add_argument("--h", type=int, required=True)
     args = ap.parse_args()
 
     img = Image.open(args.inp)
+    out_img = extend_image(img, args.w, args.h)
 
-    if args.w and args.h:
-        tw, th = args.w, args.h
-    elif args.w and args.ratio:
-        ra, rb = parse_ratio(args.ratio)
-        tw = args.w
-        th = int(round(tw * rb / ra))
-    elif args.h and args.ratio:
-        ra, rb = parse_ratio(args.ratio)
-        th = args.h
-        tw = int(round(th * ra / rb))
-    else:
-        raise SystemExit("Tenés que pasar --w y --h, o --w + --ratio, o --h + --ratio")
+    # 🧹 borrar salida previa si existe
+    if os.path.exists(args.out):
+        os.remove(args.out)
 
-    out = extend_image_to_size(img, tw, th, feather=args.feather)
-    out = out.convert("RGB") if args.out.lower().endswith((".jpg", ".jpeg")) else out
-    out.save(args.out)
-    print(f"OK: {args.out} ({tw}x{th})")
+    if args.out.lower().endswith((".jpg", ".jpeg")):
+        out_img = out_img.convert("RGB")
+
+    out_img.save(args.out)
+    print(f"OK: {args.out} ({args.w}x{args.h}) generado")
+
 
 if __name__ == "__main__":
     main()
+
+#py -3 extend_banner.py media\promocion1.png media\promocion1_final.png --w 2600 --h 600
+#py -3 extend_banner.py media\promocion2.png media\promocion2_final.png --w 2950 --h 755
+#py -3 extend_banner.py media\promocion3.png media\promocion3_final.png --w 2950 --h 755
+#py -3 extend_banner.py media\promocion4.png media\promocion4_final.png --w 2950 --h 755

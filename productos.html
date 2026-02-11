@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BEST PRICE©</title>
+    <title>BEST PRICE© — Productos</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
 
@@ -16,7 +16,6 @@
         <!-- BUSCADOR (lupa al medio) -->
         <div class="topsearch" role="search">
           <button class="topsearch__icon" type="button" aria-label="Buscar">
-            <!-- lupa -->
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M10.5 3a7.5 7.5 0 1 1 0 15A7.5 7.5 0 0 1 10.5 3Zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Zm7.7 12.3 2.9 2.9a1 1 0 0 1-1.4 1.4l-2.9-2.9a1 1 0 0 1 1.4-1.4Z"
@@ -28,7 +27,7 @@
             id="searchInput"
             class="topsearch__input"
             type="search"
-            placeholder="Buscar productos… (ej: notebook, mouse, router)"
+            placeholder="Buscar productos…"
             autocomplete="off"
           />
 
@@ -36,8 +35,8 @@
         </div>
 
         <nav class="topnav" aria-label="Navegación principal">
-          <a href="index.html" class="topnav__link is-active">Home</a>
-          <a href="productos.html" class="topnav__link">Productos</a>
+          <a href="index.html" class="topnav__link">Home</a>
+          <a href="productos.html" class="topnav__link is-active">Productos</a>
           <a href="#" class="topnav__link" onclick="return false;">Ayuda</a>
         </nav>
 
@@ -49,25 +48,77 @@
 
     <!-- MAIN -->
     <main class="page">
-      <!-- HERO = CARRUSEL (fondos generados, NO fotos de productos) -->
-      <section class="heroNZXT" id="hero">
-        <div class="heroCarousel" id="heroCarousel" aria-label="Carrusel principal">
-          <button class="heroCarousel__btn heroCarousel__btn--prev" id="heroPrev" type="button" aria-label="Anterior">
-            ‹
-          </button>
+      <section class="shopLayout">
+        <!-- SIDEBAR DE FILTROS -->
+        <aside class="filters">
+          <div class="filters__header">
+            <h1 class="filters__title">Filtrar</h1>
+            <button class="filters__clear" id="filtersClearBtn" type="button">
+              Limpiar
+            </button>
+          </div>
 
-          <button class="heroCarousel__btn heroCarousel__btn--next" id="heroNext" type="button" aria-label="Siguiente">
-            ›
-          </button>
+          <div class="filters__box">
+            <h2 class="filters__boxTitle">Categorías</h2>
+            <ul class="filters__list" id="filterCategoryList"></ul>
+          </div>
 
-          <div class="heroCarousel__dots" id="heroDots" aria-label="Paginación del carrusel"></div>
-        </div>
-      </section>
+          <div class="filters__box">
+            <h2 class="filters__boxTitle">Marcas</h2>
+            <ul class="filters__list" id="filterBrandList"></ul>
+          </div>
 
-      <!-- NOVEDADES -->
-      <section class="section">
-        <h2 class="section__title">Novedades</h2>
-        <div class="cardsGrid" id="productGrid"></div>
+          <div class="filters__box">
+            <h2 class="filters__boxTitle">Precio</h2>
+            <div class="filters__row">
+              <label class="filters__label">
+                Min
+                <input
+                  type="number"
+                  id="filterMin"
+                  class="filters__input"
+                  placeholder="$ 0"
+                  min="0"
+                />
+              </label>
+              <label class="filters__label">
+                Max
+                <input
+                  type="number"
+                  id="filterMax"
+                  class="filters__input"
+                  placeholder="$ 999999"
+                  min="0"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div class="filters__box">
+            <label class="filters__check">
+              <input type="checkbox" id="filterDeals" />
+              Solo ofertas
+            </label>
+          </div>
+        </aside>
+
+        <!-- RESULTADOS -->
+        <section class="results">
+          <div class="results__bar">
+            <p class="muted">
+              <span id="resultsCount">0</span> productos encontrados
+            </p>
+
+            <select id="resultsSort" class="results__sort">
+              <option value="featured">Ordenar: Destacados</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name-asc">Nombre A-Z</option>
+            </select>
+          </div>
+
+          <div class="shopGridAli" id="productGrid"></div>
+        </section>
       </section>
     </main>
 
