@@ -26,15 +26,18 @@ body{
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--fg);
-}
+
+  padding-top: var(--topbarH); /* ✅ para que el contenido no quede debajo del header */}
 
 /* =========================
    TOPBAR + SEARCH (header NO se reestructura, solo buscador centrado)
    ========================= */
 .topbar{
-  position: sticky;
+  position: fixed; /* ✅ siempre visible */
   top: 0;
-  z-index: 80;
+  left: 0;
+  right: 0;
+  z-index: 999;
   height: var(--topbarH);
   background: #0f0f0f;
   color: #f2f2f2;
@@ -327,8 +330,11 @@ body{
   background: #fff;
   border-radius: 14px;
   overflow:hidden;
-  border: 1px solid rgba(0,0,0,0.06);
+
+  /* ✅ solo líneas grises en bordes */
+  border: 1px solid rgba(0,0,0,0.18);
   box-shadow: none;
+
   position: relative;
 }
 
@@ -402,6 +408,10 @@ body{
   gap: 10px;
 }
 
+/* ✅ bajamos un toque el bloque del botón en NO oferta para igualar alturas */
+.pcard:not(.is-deal) .pcard__metaRow{ margin-top: 6px; }
+
+
 .pcard__tag{
   background: rgba(0,0,0,0.06);
   color: rgba(0,0,0,0.75);
@@ -413,15 +423,29 @@ body{
 
 .pcard__btn{
   border:0;
-  background:#111;
-  color:#f2f2f2;
   border-radius: 12px;
-  padding: 10px 12px;
-  font-weight: 900;
-  text-transform: uppercase;
   cursor:pointer;
-  font-size: 12px;
+  display: inline-grid;
+  place-items: center;
 }
+
+/* ✅ Botón “Sumar al carrito” como imagen */
+.pcard__btn--img{
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background-color: #0b0b0b; /* ✅ botón negro */
+  background-image: url("media/herramientas/boton-carrito.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 70%;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+}
+.pcard__btn--img:hover{
+  filter: brightness(1.08);
+}
+
 
 .pcard.is-deal .pcard__deal{ display:block; }
 .pcard.is-deal .pcard__priceNow{ color: var(--deal); }
@@ -1078,3 +1102,79 @@ body{
 .pcard.is-deal .pcard__priceWas{
   visibility: visible; /* en oferta sí se ve */
 }
+/* 🔧 Alinear botón "sumar al carrito" entre oferta y no oferta */
+
+/* productos SIN oferta → bajamos un poco el botón */
+.pcard:not(.is-deal) .pcard__btn--img {
+  margin-top: 10px;
+}
+
+/* productos CON oferta → sin ajuste */
+.pcard.is-deal .pcard__btn--img {
+  margin-top: 0;
+}
+
+/* ✅ Animación hover en cards */
+.pcard{
+  transition: transform 170ms ease, border-color 170ms ease;
+  will-change: transform;
+}
+.pcard:hover,
+.pcard:focus-within{
+  transform: translateY(-4px);
+  border-color: rgba(0,0,0,0.30);
+}
+.pcard__img{
+  transition: transform 220ms ease;
+}
+.pcard:hover .pcard__img,
+.pcard:focus-within .pcard__img{
+  transform: scale(1.03);
+}
+
+/* ✅ Buscador SOLO en productos.html (fuera del header) */
+/* =========================
+   BUSCADOR EN PRODUCTOS.HTML (estético)
+   ========================= */
+
+.topsearch--results{
+  position: relative;
+  width: 100%;
+  max-width: 860px;
+  margin: 6px 0 22px;
+
+  height: 52px;
+  border-radius: 16px;
+
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.12);
+
+  display: flex;
+  align-items: center;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+.topsearch--results .topsearch__icon{
+  width: 52px;
+  height: 52px;
+  color: rgba(0,0,0,0.55);
+}
+.topsearch--results .topsearch__input{
+  height: 52px;
+  color: #111;
+  font-size: 15px;
+  font-weight: 700;
+  padding-right: 16px;
+}
+
+.topsearch--results .topsearch__input::placeholder{
+  color: rgba(0,0,0,0.45);
+  font-weight: 600;
+}
+.topsearch--results .topsearch__dropdown{
+  top: calc(100% + 10px);
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  box-shadow: 0 18px 32px rgba(0,0,0,0.12);
+}
+

@@ -220,6 +220,130 @@ function updateCartCount() {
 }
 
 // =============================
+// 1.1) SEARCH (normalización + fuzzy)
+// =============================
+function _norm(str) {
+  return String(str || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // acentos fuera
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function _levenshtein(a, b) {
+  a = _norm(a);
+  b = _norm(b);
+  if (a === b) return 0;
+  if (!a) return b.length;
+  if (!b) return a.length;
+
+  const m = a.length;
+  const n = b.length;
+  const dp = new Array(n + 1);
+  for (let j = 0; j <= n; j++) dp[j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    let prev = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const tmp = dp[j];
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + cost);
+      prev = tmp;
+    }
+  }
+  return dp[n];
+}
+
+function _tokenThreshold(token) {
+  const l = token.length;
+  if (l <= 3) return 0;
+  if (l <= 5) return 1;
+  if (l <= 8) return 2;
+  return 3;
+}
+
+function _fuzzyTokenInText(token, words) {
+  if (!token) return true;
+  const thr = _tokenThreshold(token);
+
+  for (const w of words) {
+    if (!w) continue;
+    if (w.includes(token) || w.startsWith(token)) return true;
+
+    if (thr > 0 && Math.abs(w.length - token.length) <= thr) {
+      if (_levenshtein(w, token) <= thr) return true;
+    }
+  }
+  return false;
+}
+
+function productMatchesQuery(prod, queryRaw) {
+  const q = _norm(queryRaw);
+  if (!q) return true;
+
+  const hay = _norm(`${prod.nombre} ${prod.marca} ${prod.categoria} ${prod.tag || ""}`);
+
+  // match directo
+  if (hay.includes(q)) return true;
+
+  // match palabra por palabra con fuzzy
+  const tokens = q.split(" ").filter(Boolean);
+  const words = hay.split(" ").filter(Boolean);
+  for (const t of tokens) {
+    if (!_fuzzyTokenInText(t, words)) return false;
+  }
+  return true;
+}
+
+function filterByQuery(list, queryRaw) {
+  const q = _norm(queryRaw);
+  if (!q) return list.slice();
+  return list.filter((p) => productMatchesQuery(p, q));
+}
+
+function scoreProductForQuery(prod, queryRaw) {
+  const q = _norm(queryRaw);
+  if (!q) return 9999;
+
+  const hay = _norm(`${prod.nombre} ${prod.marca} ${prod.categoria}`);
+  if (hay.includes(q)) return 0;
+
+  const tokens = q.split(" ").filter(Boolean);
+  const words = hay.split(" ").filter(Boolean);
+
+  let score = 0;
+  for (const t of tokens) {
+    let best = 9;
+    const thr = _tokenThreshold(t);
+
+    for (const w of words) {
+      if (w.includes(t) || w.startsWith(t)) {
+        best = 0;
+        break;
+      }
+      if (thr > 0) best = Math.min(best, _levenshtein(w, t));
+    }
+    score += best;
+  }
+  return score;
+}
+
+function debounce(fn, wait = 130) {
+  let t = null;
+  return (...args) => {
+    if (t) clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
+}
+
+function isProductosPage() {
+  return window.location.pathname.toLowerCase().includes("productos.html");
+}
+
+// =============================
 // 2) HEADER: nav activo + botón carrito
 // =============================
 function initHeader() {
@@ -286,19 +410,13 @@ function createProductCard(prod) {
   priceNow.className = "pcard__priceNow";
   priceNow.textContent = formatPrice(prod.precio);
 
+  // ✅ SIEMPRE existe (para alinear altura), NO duplicar nunca
   const priceWas = document.createElement("span");
   priceWas.className = "pcard__priceWas";
-  priceWas.textContent = prod.precioAntes ? formatPrice(prod.precioAntes) : " "; // ✅ siempre existe
+  priceWas.textContent = prod.precioAntes ? formatPrice(prod.precioAntes) : " ";
 
   priceRow.appendChild(priceNow);
   priceRow.appendChild(priceWas);
-
-  if (prod.precioAntes) {
-    const was = document.createElement("span");
-    was.className = "pcard__priceWas";
-    was.textContent = formatPrice(prod.precioAntes);
-    priceRow.appendChild(was);
-  }
 
   const metaRow = document.createElement("div");
   metaRow.className = "pcard__metaRow";
@@ -307,10 +425,11 @@ function createProductCard(prod) {
   tag.className = "pcard__tag";
   tag.textContent = prod.tag || prod.categoria;
 
+  // ✅ botón compatible con tu CSS actual (negro + ícono)
   const btn = document.createElement("button");
-  btn.className = "pcard__btn";
+  btn.className = "pcard__btn pcard__btn--img";
   btn.type = "button";
-  btn.textContent = "Sumar al carrito";
+  btn.setAttribute("aria-label", "Sumar al carrito");
 
   btn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -402,14 +521,12 @@ function initHome() {
 
   setInterval(() => goToSlide(current + 1), 7000);
 
-  // destacados (home)
   renderProductGrid(BP_PRODUCTS.slice(0, 8), "productGrid");
 }
 
 // =============================
-// 5) PRODUCTOS: filtros
+// 5) PRODUCTOS: filtros + búsqueda
 // =============================
-
 const filterState = {
   categoria: null,
   marca: null,
@@ -421,37 +538,40 @@ const filterState = {
 };
 
 function initProductsPage() {
-    const params = new URLSearchParams(window.location.search);
-const q = params.get("q");
-if (q) filterState.query = q.trim();
-
   const shopLayout = document.querySelector(".shopLayout");
   if (!shopLayout) return;
 
+  // ✅ toma q de URL
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("q");
+  if (q) filterState.query = q.trim();
+
+  // ✅ si venís del footer
   const storedCat = sessionStorage.getItem("bp_categoryFilter");
   if (storedCat) {
     filterState.categoria = storedCat;
     sessionStorage.removeItem("bp_categoryFilter");
   }
 
+  // ✅ refleja query en input si existe
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput && filterState.query) searchInput.value = filterState.query;
+
   populateFilterLists();
   bindFilters();
   applyFiltersAndRender();
-  if (filterState.query) {
-  const t = filterState.query.toLowerCase();
-  list = list.filter((p) =>
-    p.nombre.toLowerCase().includes(t) ||
-    p.categoria.toLowerCase().includes(t) ||
-    p.marca.toLowerCase().includes(t)
-  );
-}
-
 }
 
 function populateFilterLists() {
+  // ✅ opcional: si hay query, armar listas SOLO con los que matchean query
+  let base = BP_PRODUCTS.slice();
+  if (filterState.query && filterState.query.trim()) {
+    base = filterByQuery(base, filterState.query);
+  }
+
   const catSet = new Set();
   const brandSet = new Set();
-  BP_PRODUCTS.forEach((p) => {
+  base.forEach((p) => {
     catSet.add(p.categoria);
     brandSet.add(p.marca);
   });
@@ -557,11 +677,20 @@ function bindFilters() {
       filterState.max = null;
       filterState.ofertas = false;
       filterState.sort = "featured";
+      filterState.query = "";
 
       if (minInput) minInput.value = "";
       if (maxInput) maxInput.value = "";
       if (dealsCheck) dealsCheck.checked = false;
       if (sortSelect) sortSelect.value = "featured";
+
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) searchInput.value = "";
+
+      // ✅ limpia el ?q= de la URL
+      const u = new URL(window.location.href);
+      u.searchParams.delete("q");
+      window.history.replaceState({}, "", u.toString());
 
       populateFilterLists();
       applyFiltersAndRender();
@@ -570,7 +699,12 @@ function bindFilters() {
 }
 
 function applyFiltersAndRender() {
-  let list = [...BP_PRODUCTS];
+  let list = BP_PRODUCTS.slice();
+
+  // ✅ búsqueda primero (fuzzy)
+  if (filterState.query && filterState.query.trim()) {
+    list = filterByQuery(list, filterState.query);
+  }
 
   if (filterState.categoria) list = list.filter((p) => p.categoria === filterState.categoria);
   if (filterState.marca) list = list.filter((p) => p.marca === filterState.marca);
@@ -624,7 +758,7 @@ function initFooterCategories() {
 }
 
 // =============================
-// 7) BUSCADOR (sin ejemplos)
+// 7) BUSCADOR (tiempo real + fuzzy)
 // =============================
 function initSearch() {
   const input = document.getElementById("searchInput");
@@ -632,38 +766,62 @@ function initSearch() {
   if (!input || !dropdown) return;
 
   input.placeholder = "Buscar productos…";
-  function goSearch(term) {
-  const q = (term || "").trim();
-  if (!q) return;
-
-  // si ya estás en productos.html, aplico la búsqueda sin recargar
-  if (window.location.pathname.toLowerCase().includes("productos.html")) {
-    filterState.query = q;
-    applyFiltersAndRender();
-    close();
-    return;
-  }
-
-  // si estás en otra página, te llevo a productos con query
-  window.location.href = `productos.html?q=${encodeURIComponent(q)}`;
-}
 
   function close() {
     dropdown.hidden = true;
     dropdown.innerHTML = "";
   }
 
-  input.addEventListener("input", () => {
-    const term = input.value.trim().toLowerCase();
-    if (!term) return close();
+  function setURLQuery(q) {
+    if (!isProductosPage()) return;
+    const u = new URL(window.location.href);
+    if (q && q.trim()) u.searchParams.set("q", q.trim());
+    else u.searchParams.delete("q");
+    window.history.replaceState({}, "", u.toString());
+  }
 
-    const matches = BP_PRODUCTS.filter((p) => {
-      return (
-        p.nombre.toLowerCase().includes(term) ||
-        p.categoria.toLowerCase().includes(term) ||
-        p.marca.toLowerCase().includes(term)
-      );
-    }).slice(0, 7);
+  function goSearch(term) {
+    const q = (term || "").trim();
+    if (!q) return;
+
+    if (isProductosPage()) {
+      filterState.query = q;
+      populateFilterLists();
+      applyFiltersAndRender();
+      setURLQuery(q);
+      close();
+      return;
+    }
+
+    window.location.href = `productos.html?q=${encodeURIComponent(q)}`;
+  }
+
+  // ✅ tiempo real solo en productos.html (debounce para que sea fluido)
+  const liveApply = debounce((term) => {
+    if (!isProductosPage()) return;
+    filterState.query = (term || "").trim();
+    populateFilterLists();
+    applyFiltersAndRender();
+    setURLQuery(filterState.query);
+  }, 120);
+
+  input.addEventListener("input", () => {
+    const raw = input.value || "";
+    const term = raw.trim();
+
+    // ✅ productos.html: filtra mientras tipeás
+    liveApply(term);
+
+    const q = _norm(term);
+    if (!q) return close();
+
+    // ✅ sugerencias fuzzy
+    const matches = BP_PRODUCTS
+      .filter((p) => productMatchesQuery(p, q))
+      .map((p) => ({ p, s: scoreProductForQuery(p, q) }))
+      .sort((a, b) => a.s - b.s)
+      .slice(0, 7)
+      .map((x) => x.p);
 
     if (!matches.length) return close();
 
@@ -695,10 +853,7 @@ function initSearch() {
       row.appendChild(left);
       row.appendChild(price);
 
-      row.onclick = () => {
-  goSearch(input.value); // ✅ manda a productos y muestra similitudes
-};
-
+      row.onclick = () => goSearch(input.value);
 
       dropdown.appendChild(row);
     });
@@ -707,17 +862,18 @@ function initSearch() {
   document.addEventListener("click", (e) => {
     if (!dropdown.contains(e.target) && e.target !== input) close();
   });
-  input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    goSearch(input.value);
-  }
-});
-const iconBtn = document.querySelector(".topsearch__icon");
-if (iconBtn) {
-  iconBtn.addEventListener("click", () => goSearch(input.value));
-}
 
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      goSearch(input.value);
+    }
+  });
+
+  const iconBtn = document.querySelector(".topsearch__icon");
+  if (iconBtn) {
+    iconBtn.addEventListener("click", () => goSearch(input.value));
+  }
 }
 
 // =============================
@@ -994,15 +1150,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initSearch();
   initFooterCategories();
 
-  // home
   if (document.getElementById("heroCarousel")) initHome();
-
-  // productos
   if (document.querySelector(".shopLayout")) initProductsPage();
 
-  // producto
   initProductDetail();
-
-  // carrito
   initCartPage();
 });
