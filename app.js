@@ -994,10 +994,20 @@ function initProductDetail() {
 // =============================
 // 9) CARRITO (más serio)
 // =============================
+
 function initCartPage() {
   const listEl = document.getElementById("cartItems");
   const summaryEl = document.getElementById("cartSummary");
   if (!listEl || !summaryEl) return;
+
+  const recsEl = document.getElementById("cartRecs");
+
+  function renderRecs(cartIds) {
+    if (!recsEl) return;
+    const recs = BP_PRODUCTS.filter((p) => !cartIds.includes(p.id)).slice(0, 8);
+    recsEl.innerHTML = "";
+    recs.forEach((p) => recsEl.appendChild(createProductCard(p)));
+  }
 
   function reload() {
     const cart = getCart();
@@ -1010,6 +1020,7 @@ function initCartPage() {
       empty.textContent = "Tu carrito está vacío.";
       listEl.appendChild(empty);
       summaryEl.appendChild(empty.cloneNode(true));
+      renderRecs([]);
       return;
     }
 
@@ -1022,10 +1033,27 @@ function initCartPage() {
       const row = document.createElement("div");
       row.className = "cartItem";
 
+      // Imagen + checkbox (estilo tipo Amazon, sin tocar tu CSS global)
+      const media = document.createElement("div");
+      media.style.position = "relative";
+
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.checked = true;
+      check.setAttribute("aria-label", "Seleccionar producto");
+      check.style.position = "absolute";
+      check.style.left = "-8px";
+      check.style.top = "-8px";
+      check.style.width = "18px";
+      check.style.height = "18px";
+
       const img = document.createElement("img");
       img.className = "cartItem__img";
       img.src = prod.imagen;
       img.alt = prod.nombre;
+
+      media.appendChild(check);
+      media.appendChild(img);
 
       const info = document.createElement("div");
 
@@ -1037,8 +1065,34 @@ function initCartPage() {
       meta.className = "cartItem__meta";
       meta.textContent = `${prod.marca} · ${prod.categoria}`;
 
+      const stock = document.createElement("div");
+      stock.style.marginTop = "6px";
+      stock.style.fontSize = "13px";
+      stock.style.opacity = "0.9";
+      stock.textContent = "Disponible";
+
+      const ship = document.createElement("div");
+      ship.style.marginTop = "4px";
+      ship.style.fontSize = "13px";
+      ship.style.opacity = "0.85";
+      ship.textContent = "Envío GRATIS (demo) · Llega en 24/48 hs (demo)";
+
+      // Controles de cantidad + acciones (tipo Amazon)
+      const actions = document.createElement("div");
+      actions.style.display = "flex";
+      actions.style.alignItems = "center";
+      actions.style.gap = "10px";
+      actions.style.flexWrap = "wrap";
+      actions.style.marginTop = "10px";
+
       const qtyRow = document.createElement("div");
       qtyRow.className = "cartItem__qtyRow";
+
+      const removeIcon = document.createElement("button");
+      removeIcon.className = "cartQtyBtn";
+      removeIcon.type = "button";
+      removeIcon.setAttribute("aria-label", "Eliminar");
+      removeIcon.textContent = "🗑";
 
       const minus = document.createElement("button");
       minus.className = "cartQtyBtn";
@@ -1053,9 +1107,23 @@ function initCartPage() {
       plus.type = "button";
       plus.textContent = "+";
 
+      function syncQty() {
+        qty.textContent = String(item.cantidad);
+      }
+
+      removeIcon.onclick = () => {
+        const idx = cart.indexOf(item);
+        if (idx >= 0) cart.splice(idx, 1);
+        saveCart(cart);
+        reload();
+      };
+
       minus.onclick = () => {
         if (item.cantidad > 1) item.cantidad -= 1;
-        else cart.splice(cart.indexOf(item), 1);
+        else {
+          const idx = cart.indexOf(item);
+          if (idx >= 0) cart.splice(idx, 1);
+        }
         saveCart(cart);
         reload();
       };
@@ -1063,9 +1131,12 @@ function initCartPage() {
       plus.onclick = () => {
         item.cantidad += 1;
         saveCart(cart);
+        syncQty();
+        // no recargar completo, pero actualizamos totales abajo
         reload();
       };
 
+      qtyRow.appendChild(removeIcon);
       qtyRow.appendChild(minus);
       qtyRow.appendChild(qty);
       qtyRow.appendChild(plus);
@@ -1074,17 +1145,32 @@ function initCartPage() {
       removeBtn.className = "cartItem__remove";
       removeBtn.type = "button";
       removeBtn.textContent = "Eliminar";
-      removeBtn.onclick = () => {
-        const idx = cart.indexOf(item);
-        if (idx >= 0) cart.splice(idx, 1);
-        saveCart(cart);
-        reload();
-      };
+      removeBtn.onclick = removeIcon.onclick;
+
+      const saveBtn = document.createElement("a");
+      saveBtn.href = "#";
+      saveBtn.onclick = (e) => e.preventDefault();
+      saveBtn.style.fontSize = "13px";
+      saveBtn.style.opacity = "0.9";
+      saveBtn.textContent = "Guardar para más tarde";
+
+      const shareBtn = document.createElement("a");
+      shareBtn.href = "#";
+      shareBtn.onclick = (e) => e.preventDefault();
+      shareBtn.style.fontSize = "13px";
+      shareBtn.style.opacity = "0.9";
+      shareBtn.textContent = "Compartir";
+
+      actions.appendChild(qtyRow);
+      actions.appendChild(removeBtn);
+      actions.appendChild(saveBtn);
+      actions.appendChild(shareBtn);
 
       info.appendChild(name);
       info.appendChild(meta);
-      info.appendChild(qtyRow);
-      info.appendChild(removeBtn);
+      info.appendChild(stock);
+      info.appendChild(ship);
+      info.appendChild(actions);
 
       const price = document.createElement("div");
       price.className = "cartItem__price";
@@ -1093,54 +1179,57 @@ function initCartPage() {
 
       subtotal += totalItem;
 
-      row.appendChild(img);
+      row.appendChild(media);
       row.appendChild(info);
       row.appendChild(price);
 
       listEl.appendChild(row);
     });
 
-    const ship = Math.round(subtotal * 0.02); // demo envío
-    const grandTotal = subtotal + ship;
+    const shipCost = Math.round(subtotal * 0.02); // demo envío
+    const grandTotal = subtotal + shipCost;
 
     const subRow = document.createElement("div");
     subRow.className = "cartSummary__row";
-    subRow.innerHTML = `<span>Subtotal</span><span>${formatPrice(subtotal)}</span>`;
+    subRow.innerHTML = `<span>Subtotal (${cart.reduce((a, it) => a + (it.cantidad || 0), 0)} productos)</span><span>${formatPrice(subtotal)}</span>`;
 
     const shipRow = document.createElement("div");
     shipRow.className = "cartSummary__row";
-    shipRow.innerHTML = `<span>Envío (demo)</span><span>${formatPrice(ship)}</span>`;
+    shipRow.innerHTML = `<span>Envío (demo)</span><span>${formatPrice(shipCost)}</span>`;
 
     const grand = document.createElement("div");
     grand.className = "cartSummary__total";
     grand.textContent = `Total final: ${formatPrice(grandTotal)}`;
 
-    const coupon = document.createElement("div");
-    coupon.className = "cartCoupon";
-    coupon.innerHTML = `
-      <input type="text" placeholder="Cupón (demo)" />
-      <button type="button">Aplicar</button>
-    `;
-
     const box = document.createElement("div");
     box.className = "cartSummary__box";
-    box.appendChild(coupon);
+
+    const gift = document.createElement("label");
+    gift.style.display = "flex";
+    gift.style.alignItems = "center";
+    gift.style.gap = "10px";
+    gift.style.margin = "10px 0 12px";
+    gift.innerHTML = `<input type="checkbox" /> <span>Este pedido contiene un regalo (demo)</span>`;
 
     const payBtn = document.createElement("button");
     payBtn.className = "btnPrimary";
     payBtn.type = "button";
     payBtn.style.width = "100%";
-    payBtn.textContent = "Finalizar compra (demo)";
+    payBtn.textContent = "Proceder al pago (demo)";
 
     summaryEl.appendChild(subRow);
     summaryEl.appendChild(shipRow);
     summaryEl.appendChild(grand);
+    box.appendChild(gift);
+    box.appendChild(payBtn);
     summaryEl.appendChild(box);
-    summaryEl.appendChild(payBtn);
+
+    renderRecs(cart.map((c) => c.id));
   }
 
   reload();
 }
+
 
 // =============================
 // 10) BOOT

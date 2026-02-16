@@ -32,9 +32,7 @@
         <aside class="filters">
           <div class="filters__header">
             <h1 class="filters__title">Filtrar</h1>
-            <button class="filters__clear" id="filtersClearBtn" type="button">
-              Limpiar
-            </button>
+            <button class="filters__clear filters__clear--img" id="filtersClearBtn" type="button" aria-label="Limpiar filtros">Limpiar</button>
           </div>
 
           <div class="filters__box">
@@ -139,7 +137,15 @@
 
         <div class="footer__bottom">
           <div class="footer__meta">
-            <span class="footer__metaItem">Argentina</span>
+            <span class="footer__metaItem footer__metaItem--flag" aria-label="Argentina">
+  <img
+    class="footer__flag"
+    src="media/herramientas/bandera-removebg-preview.png"
+    alt="Argentina"
+    loading="lazy"
+  />
+</span>
+
             <span class="footer__metaItem">Soporte: 11 0000-0000</span>
             <a class="footer__metaLink" href="#" onclick="return false;">Instagram</a>
           </div>

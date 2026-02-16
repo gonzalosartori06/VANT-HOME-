@@ -196,7 +196,8 @@ body{
 
   background: #e8e8e8;
   border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.10);
+
+  box-shadow: none
 }
 
 /* slides – imagen nítida (contain) + fondo blur (cover) SIN estirar */
@@ -332,7 +333,7 @@ body{
   overflow:hidden;
 
   /* ✅ solo líneas grises en bordes */
-  border: 1px solid rgba(0,0,0,0.18);
+  border: 1px solid rgba(0,0,0,0.26); /* ⬅ más contraste, sigue siendo fino */
   box-shadow: none;
 
   position: relative;
@@ -484,18 +485,20 @@ body{
 }
 
 .filters__header{
-  display:flex;
+  display: flex;
+  align-items: center;        /* 🔑 centra vertical real */
   justify-content: space-between;
-  align-items: baseline;
   gap: 12px;
+  min-height: 44px;           /* 🔑 misma altura visual que el botón */
 }
 
+
 .filters__title{
-  margin:0;
-  font-weight: 950;
-  letter-spacing: -0.03em;
+  margin: 0;
+  line-height: 1;             /* 🔑 evita que “baje” visualmente */
   font-size: 22px;
 }
+
 
 .filters__clear{
   border:0;
@@ -1122,8 +1125,9 @@ body{
 .pcard:hover,
 .pcard:focus-within{
   transform: translateY(-4px);
-  border-color: rgba(0,0,0,0.30);
+  border-color: rgba(0,0,0,0.38);
 }
+
 .pcard__img{
   transition: transform 220ms ease;
 }
@@ -1178,3 +1182,144 @@ body{
   box-shadow: 0 18px 32px rgba(0,0,0,0.12);
 }
 
+/* 🇦🇷 Bandera footer alineada */
+.footer__metaItem--flag{
+  display: flex;
+  align-items: center;   /* 🔑 centra vertical */
+  height: 24px;          /* fuerza línea consistente */
+}
+
+
+/* 🇦🇷 Bandera footer (más grande y visible) */
+.footer__flag{
+  width: 34px;
+  height: auto;
+  display: block;
+
+  transform: translateY(-1px); /* micro-ajuste visual */
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+}
+
+/* Alineación correcta del footer meta */
+.footer__meta{
+  display: flex;
+  align-items: center;   /* 🔑 clave */
+  gap: 22px;
+}
+
+/* ✅ Select "Ordenar" con el mismo gris que el título de productos */
+.results__sort{
+  color: rgba(0,0,0,0.82);
+}
+.results__sort option{
+  color: rgba(0,0,0,0.82);
+}
+/* ✅ permitir botón X sin romper layout */
+.topsearch__input{ flex: 1; width: auto; }
+
+/* ✅ Botón X para limpiar buscador */
+.topsearch__clear{
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: none;           /* se muestra solo si hay texto */
+  place-items: center;
+  margin-right: 8px;
+  border-radius: 12px;
+  color: rgba(0,0,0,0.55);
+}
+
+.topsearch__clear:hover{
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.75);
+}
+
+.topsearch__clear svg{
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+/* ✅ Botón limpiar (imagen de basura) */
+.filters__clear--img{
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  /* imagen */
+  background-image: url("media/herramientas/basura-boton.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 85%;
+
+  /* ocultar texto sin romper accesibilidad */
+  font-size: 0;
+}
+
+.filters__clear--img:hover{
+  filter: brightness(1.05);
+}
+
+.filters__clear--img:focus-visible{
+  outline: 2px solid rgba(0,0,0,0.25);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+/* ✅ Header "Filtrar" prolijo: título a la izquierda, botón a la derecha */
+.filters__head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* evita que el título se desacomode por line-height */
+.filters__title{
+  margin: 0;
+  line-height: 1;
+}
+
+/* ✅ Botón limpiar con imagen: box fijo y centrado */
+.filters__clear--img{
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;       /* 🔑 mantiene tamaño fijo */
+
+  background-image: url("media/herramientas/basura-boton.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 28px 28px;  /* tamaño del ícono */
+  font-size: 0;                /* oculta texto */
+  border-radius: 12px;
+}
+
+/* hover sutil para que se vea “botón” */
+.filters__clear--img:hover{
+  background-color: rgba(0,0,0,0.06);
+}
+
+/* foco accesible */
+.filters__clear--img:focus-visible{
+  outline: 2px solid rgba(0,0,0,0.25);
+  outline-offset: 2px;
+}
+.filters__clear--img{
+  opacity: 0.75;
+}
+.filters__clear--img:hover{
+  opacity: 1;
+}
+.filters__box{
+  margin-top: 16px;
+}

@@ -48,7 +48,8 @@
     <!-- MAIN -->
     <main class="page">
       <section class="cartPage">
-        <h1 class="cartPage__title">Tu carrito</h1>
+        <h1 class="cartPage__title">Carrito de compras</h1>
+        <a href="#" class="muted" style="display:inline-block;margin:-10px 0 14px;" onclick="return false;">Anular la selección de todos los elementos</a>
 
         <div class="cartPage__content">
           <div class="cartPage__items" id="cartItems"></div>
@@ -56,6 +57,12 @@
           <aside class="cartPage__summary" id="cartSummary">
             <!-- JS mete resumen acá -->
           </aside>
+        </div>
+
+        <!-- Recomendados (misma estética del sitio, sin tocar header/footer) -->
+        <div style="margin-top:26px;">
+          <h2 style="margin:0 0 14px;font-size:20px;font-weight:900;letter-spacing:-0.03em;">Recomendado según tus tendencias de compras</h2>
+          <div class="cardsGrid" id="cartRecs"></div>
         </div>
       </section>
     </main>
@@ -76,7 +83,15 @@
 
         <div class="footer__bottom">
           <div class="footer__meta">
-            <span class="footer__metaItem">Argentina</span>
+            <span class="footer__metaItem footer__metaItem--flag" aria-label="Argentina">
+  <img
+    class="footer__flag"
+    src="media/herramientas/bandera-removebg-preview.png"
+    alt="Argentina"
+    loading="lazy"
+  />
+</span>
+
             <span class="footer__metaItem">Soporte: 11 0000-0000</span>
             <a class="footer__metaLink" href="#" onclick="return false;">Instagram</a>
           </div>
