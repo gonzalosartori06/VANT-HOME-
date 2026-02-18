@@ -201,6 +201,14 @@ function getCart() {
 function saveCart(cart) {
   localStorage.setItem("bp_cart", JSON.stringify(cart));
   updateCartCount();
+
+  // ✅ Notifica cambios del carrito (misma pestaña + carrito.html)
+  // Nota: el evento 'storage' NO se dispara en la misma pestaña.
+  try {
+    window.dispatchEvent(new CustomEvent("bp_cart_updated", { detail: { cart } }));
+  } catch {
+    window.dispatchEvent(new Event("bp_cart_updated"));
+  }
 }
 
 function addToCart(productId, qty) {
@@ -358,13 +366,12 @@ function initHeader() {
 
   // nav activo por página
   const navLinks = document.querySelectorAll(".topnav__link");
-  let activeKey = "index.html";
+  // ✅ En carrito.html NO se marca ningún link (ni Home, ni Productos, ni Ayuda)
+  let activeKey = null;
 
-  if (
-    path.includes("productos.html") ||
-    path.includes("producto.html") ||
-    path.includes("carrito.html")
-  ) {
+  if (path.includes("carrito.html")) {
+    activeKey = null;
+  } else if (path.includes("productos.html") || path.includes("producto.html")) {
     activeKey = "productos.html";
   } else {
     activeKey = "index.html";
@@ -372,7 +379,15 @@ function initHeader() {
 
   navLinks.forEach((a) => {
     const href = (a.getAttribute("href") || "").toLowerCase();
-    if (!href || href === "#") return;
+    // Si estamos en carrito.html, limpiamos cualquier activo (incluyendo links con href="#")
+    if (!activeKey) {
+      a.classList.remove("is-active");
+      return;
+    }
+    if (!href || href === "#") {
+      a.classList.remove("is-active");
+      return;
+    }
     a.classList.toggle("is-active", href === activeKey);
   });
 
@@ -1284,7 +1299,6 @@ function initCartPage() {
         const idx = cart.indexOf(item);
         if (idx >= 0) cart.splice(idx, 1);
         saveCart(cart);
-        reload();
       }
 
       removeIcon.onclick = removeItem;
@@ -1293,13 +1307,11 @@ function initCartPage() {
         if (item.cantidad > 1) item.cantidad -= 1;
         else removeItem();
         saveCart(cart);
-        reload();
       };
 
       plus.onclick = () => {
         item.cantidad += 1;
         saveCart(cart);
-        reload();
       };
 
       qtyRow.appendChild(removeIcon);
@@ -1397,6 +1409,13 @@ function initCartPage() {
     renderSideRecs(cartProds);
     renderRecs(cartProds);
   }
+
+  // ✅ Tiempo real: si agregás desde los recomendados o cambia en otra pestaña,
+  // la lista del carrito se vuelve a dibujar automáticamente.
+  window.addEventListener("bp_cart_updated", () => reload());
+  window.addEventListener("storage", (e) => {
+    if (e && e.key === "bp_cart") reload();
+  });
 
   reload();
 }
