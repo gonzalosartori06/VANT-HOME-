@@ -374,8 +374,16 @@ body{
   letter-spacing: -0.02em;
   line-height: 1.15;
   font-size: 14px;
-  color: rgba(0,0,0,0.82); /* 👈 negro más claro */
+  color: rgba(0,0,0,0.82);
   min-height: 34px;
+}
+/* Igualar color del ordenar con el título de los productos */
+.results__sort{
+  color: rgba(0,0,0,0.82);
+}
+
+.results__sort option{
+  color: rgba(0,0,0,0.82);
 }
 
 /* PRECIO → negro puro */
