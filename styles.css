@@ -485,11 +485,12 @@ body{
 }
 
 .filters__header{
-  display:flex;
+  display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center; /* 🔑 ALINEACIÓN CORRECTA */
   gap: 12px;
 }
+
 
 .filters__title{
   margin:0;
