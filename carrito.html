@@ -103,23 +103,41 @@
         <div class="cartPage__content">
           <div class="cartPage__items" id="cartItems"></div>
 
-          <aside>
+          <aside class="cartPage__right">
             <div class="cartPage__summary" id="cartSummary">
               <!-- JS mete resumen acá -->
             </div>
 
-            <div class="cartSideRecs" id="cartSideRecs" aria-label="Productos relacionados con artículos en tu carrito">
-              <h2 class="cartSideRecs__title">Productos relacionados con artículos en tu carrito</h2>
-              <div class="cartSideRecs__track" id="cartSideRecsTrack"></div>
+            
+            <div class="cartCarousel" id="cartSideRecs" aria-label="Productos relacionados con artículos en tu carrito">
+              <div class="cartCarousel__head">
+                <h2 class="cartCarousel__title">Productos relacionados con artículos en tu carrito</h2>
+                <div class="cartCarousel__ctrls">
+                  <button class="cartCarousel__btn" type="button" data-carousel="cartSideRecsTrack" data-dir="-1" aria-label="Anterior">‹</button>
+                  <button class="cartCarousel__btn" type="button" data-carousel="cartSideRecsTrack" data-dir="1" aria-label="Siguiente">›</button>
+                </div>
+              </div>
+              <div class="cartCarousel__track" id="cartSideRecsTrack"></div>
             </div>
+
           </aside>
         </div>
       </section>
 
+      
       <section class="cartRecsWrap" aria-label="Recomendado según tus tendencias de compras">
-        <h2 class="cartRecsWrap__title">Recomendado según tus tendencias de compras</h2>
-        <div class="cartRecsGrid" id="cartRecs"></div>
+        <div class="cartCarousel">
+          <div class="cartCarousel__head">
+            <h2 class="cartCarousel__title">Recomendado según tus tendencias de compras</h2>
+            <div class="cartCarousel__ctrls">
+              <button class="cartCarousel__btn" type="button" data-carousel="cartRecs" data-dir="-1" aria-label="Anterior">‹</button>
+              <button class="cartCarousel__btn" type="button" data-carousel="cartRecs" data-dir="1" aria-label="Siguiente">›</button>
+            </div>
+          </div>
+          <div class="cartCarousel__track" id="cartRecs"></div>
+        </div>
       </section>
+
     </main>
 
     <!-- FOOTER -->
