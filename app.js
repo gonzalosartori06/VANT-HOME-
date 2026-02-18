@@ -284,7 +284,9 @@ function productMatchesQuery(prod, queryRaw) {
   const q = _norm(queryRaw);
   if (!q) return true;
 
-  const hay = _norm(`${prod.nombre} ${prod.marca} ${prod.categoria} ${prod.tag || ""}`);
+  const hay = _norm(
+    `${prod.nombre} ${prod.marca} ${prod.categoria} ${prod.tag || ""}`
+  );
 
   // match directo
   if (hay.includes(q)) return true;
@@ -370,7 +372,8 @@ function initHeader() {
   });
 
   const cartBtn = document.getElementById("cartBtn");
-  if (cartBtn) cartBtn.addEventListener("click", () => (window.location.href = "carrito.html"));
+  if (cartBtn)
+    cartBtn.addEventListener("click", () => (window.location.href = "carrito.html"));
 
   updateCartCount();
 }
@@ -581,30 +584,34 @@ function populateFilterLists() {
 
   if (catList) {
     catList.innerHTML = "";
-    Array.from(catSet).sort().forEach((cat) => {
-      const li = document.createElement("li");
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = cat;
-      btn.dataset.value = cat;
-      btn.classList.toggle("is-active", filterState.categoria === cat);
-      li.appendChild(btn);
-      catList.appendChild(li);
-    });
+    Array.from(catSet)
+      .sort()
+      .forEach((cat) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = cat;
+        btn.dataset.value = cat;
+        btn.classList.toggle("is-active", filterState.categoria === cat);
+        li.appendChild(btn);
+        catList.appendChild(li);
+      });
   }
 
   if (brandList) {
     brandList.innerHTML = "";
-    Array.from(brandSet).sort().forEach((brand) => {
-      const li = document.createElement("li");
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = brand;
-      btn.dataset.value = brand;
-      btn.classList.toggle("is-active", filterState.marca === brand);
-      li.appendChild(btn);
-      brandList.appendChild(li);
-    });
+    Array.from(brandSet)
+      .sort()
+      .forEach((brand) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = brand;
+        btn.dataset.value = brand;
+        btn.classList.toggle("is-active", filterState.marca === brand);
+        li.appendChild(btn);
+        brandList.appendChild(li);
+      });
   }
 }
 
@@ -758,14 +765,74 @@ function initFooterCategories() {
 }
 
 // =============================
-// 7) BUSCADOR (tiempo real + fuzzy)
+// 7) BUSCADOR (tiempo real + fuzzy) + ✅ BOTÓN CLEAR (X)
 // =============================
+
+function injectSearchClearStylesOnce() {
+  if (document.getElementById("bp-search-clear-style")) return;
+  const style = document.createElement("style");
+  style.id = "bp-search-clear-style";
+  style.textContent = `
+    .topsearch__clear{
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      display: none;           /* se activa con JS */
+      place-items: center;
+      opacity: 0.85;
+      flex: 0 0 auto;
+    }
+    .topsearch__clear svg{
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Header search (altura 44px) */
+    .topsearch:not(.topsearch--results) .topsearch__clear{
+      width: 46px;
+      height: 44px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* Productos search (altura 52px) */
+    .topsearch--results .topsearch__clear{
+      width: 52px;
+      height: 52px;
+      color: rgba(0,0,0,0.55);
+    }
+
+    /* Hover sutil */
+    .topsearch__clear:hover{ opacity: 1; }
+  `;
+  document.head.appendChild(style);
+}
+
 function initSearch() {
   const input = document.getElementById("searchInput");
   const dropdown = document.getElementById("searchDropdown");
   if (!input || !dropdown) return;
 
+  injectSearchClearStylesOnce();
   input.placeholder = "Buscar productos…";
+
+  const wrapper = input.closest(".topsearch");
+  let clearBtn = wrapper ? wrapper.querySelector(".topsearch__clear") : null;
+
+  // ✅ crea la X si no existe (no tenés que tocar HTML)
+  if (wrapper && !clearBtn) {
+    clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "topsearch__clear";
+    clearBtn.setAttribute("aria-label", "Borrar búsqueda");
+    clearBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7A1 1 0 0 0 5.7 7.1L10.6 12l-4.9 4.9a1 1 0 1 0 1.4 1.4L12 13.4l4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4Z"/>
+      </svg>
+    `;
+    // la insertamos antes del dropdown (así queda a la derecha del input)
+    wrapper.insertBefore(clearBtn, dropdown);
+  }
 
   function close() {
     dropdown.hidden = true;
@@ -796,6 +863,34 @@ function initSearch() {
     window.location.href = `productos.html?q=${encodeURIComponent(q)}`;
   }
 
+  function syncClearVisibility() {
+    if (!clearBtn) return;
+    const has = (input.value || "").trim().length > 0;
+    clearBtn.style.display = has ? "grid" : "none";
+  }
+
+  function clearSearchEverywhere() {
+    input.value = "";
+    syncClearVisibility();
+    close();
+    input.focus();
+
+    // ✅ si estás en productos.html: también limpia el filtro y re-renderiza
+    if (isProductosPage()) {
+      filterState.query = "";
+      setURLQuery("");
+      populateFilterLists();
+      applyFiltersAndRender();
+    }
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      clearSearchEverywhere();
+    });
+  }
+
   // ✅ tiempo real solo en productos.html (debounce para que sea fluido)
   const liveApply = debounce((term) => {
     if (!isProductosPage()) return;
@@ -805,9 +900,14 @@ function initSearch() {
     setURLQuery(filterState.query);
   }, 120);
 
+  // estado inicial del botón X
+  syncClearVisibility();
+
   input.addEventListener("input", () => {
     const raw = input.value || "";
     const term = raw.trim();
+
+    syncClearVisibility();
 
     // ✅ productos.html: filtra mientras tipeás
     liveApply(term);
@@ -853,6 +953,7 @@ function initSearch() {
       row.appendChild(left);
       row.appendChild(price);
 
+      // ✅ al clickear una sugerencia, busca con lo que haya en el input
       row.onclick = () => goSearch(input.value);
 
       dropdown.appendChild(row);
@@ -867,6 +968,11 @@ function initSearch() {
     if (e.key === "Enter") {
       e.preventDefault();
       goSearch(input.value);
+    }
+    // ✅ ESC limpia rápido (opcional, pero útil)
+    if (e.key === "Escape") {
+      e.preventDefault();
+      clearSearchEverywhere();
     }
   });
 
@@ -976,8 +1082,10 @@ function initProductDetail() {
     const tab = btn.dataset.tab;
 
     if (tab === "desc") body.textContent = prod.descripcion || "Producto demo.";
-    if (tab === "specs") body.textContent = "Specs demo: CPU / RAM / Almacenamiento / Conectividad / etc.";
-    if (tab === "warranty") body.textContent = "Garantía demo: 12 meses con fabricante / tienda.";
+    if (tab === "specs")
+      body.textContent = "Specs demo: CPU / RAM / Almacenamiento / Conectividad / etc.";
+    if (tab === "warranty")
+      body.textContent = "Garantía demo: 12 meses con fabricante / tienda.";
   });
 
   info.appendChild(title);
