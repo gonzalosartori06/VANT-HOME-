@@ -1398,7 +1398,7 @@ function initCartPage() {
     gift.style.alignItems = "center";
     gift.style.gap = "10px";
     gift.style.margin = "10px 0 12px";
-    gift.innerHTML = `<input type="checkbox" /> <span>Este pedido contiene un regalo (demo)</span>`;
+    
 
     const payBtn = document.createElement("button");
     payBtn.className = "btnPrimary";
