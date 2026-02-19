@@ -233,6 +233,26 @@ function updateCartCount() {
 }
 
 // =============================
+// 1.x) STOCK (solo UI carrito)
+// =============================
+// Si un producto tiene `stockDisponible`, lo usamos.
+// Si no, usamos un mapa demo (para que funcione sin tocar tu catálogo).
+const BP_STOCK_DEMO = {
+  // ejemplo (podés ajustar/expandir ids)
+  "notebook-asus-gaming": 3,
+  "auriculares-corsair-hs80": 2,
+  "legacy-1": 4
+};
+
+function getProductAvailableStock(prod) {
+  if (!prod) return null;
+  if (typeof prod.stockDisponible === "number") return prod.stockDisponible;
+  if (BP_STOCK_DEMO[prod.id] != null) return Number(BP_STOCK_DEMO[prod.id]);
+  return null; // null => asumimos stock normal (muestra "Disponible")
+}
+
+
+// =============================
 // 1.1) SEARCH (normalización + fuzzy)
 // =============================
 function _norm(str) {
@@ -1252,15 +1272,21 @@ function initCartPage() {
       name.className = "cartItem__name";
       name.textContent = prod.nombre;
 
-      const meta = document.createElement("div");
-      meta.className = "cartItem__meta";
-      meta.textContent = `${prod.marca} · ${prod.categoria}`;
-
+      // ✅ NO mostrar etiquetas/tags del producto en el carrito
+      // (dejamos solo el estado de stock)
       const stock = document.createElement("div");
-      stock.style.marginTop = "6px";
-      stock.style.fontSize = "13px";
-      stock.style.opacity = "0.9";
-      stock.textContent = "Disponible";
+      stock.className = "cartItem__stock";
+
+      const available = getProductAvailableStock(prod);
+      const lowStockThreshold = 5;
+
+      if (available != null && available > 0 && available <= lowStockThreshold) {
+        stock.classList.add("cartItem__stock--low");
+        stock.textContent = `Solo queda(n) ${available} en stock (hay más unidades en camino).`;
+      } else {
+        stock.classList.add("cartItem__stock--ok");
+        stock.textContent = "Disponible";
+      }
 
       const shipLine = document.createElement("div");
       shipLine.style.marginTop = "4px";
@@ -1325,30 +1351,11 @@ function initCartPage() {
       removeBtn.textContent = "Eliminar";
       removeBtn.onclick = removeItem;
 
-      const links = document.createElement("div");
-      links.className = "cartItem__links";
-
-      const saveBtn = document.createElement("a");
-      saveBtn.textContent = "Guardar para más tarde";
-      saveBtn.className = "cartItem__link";
-      saveBtn.href = "#";
-      saveBtn.onclick = (e) => e.preventDefault();
-
-      const shareBtn = document.createElement("a");
-      shareBtn.textContent = "Compartir";
-      shareBtn.className = "cartItem__link";
-      shareBtn.href = "#";
-      shareBtn.onclick = (e) => e.preventDefault();
-
-      links.appendChild(saveBtn);
-      links.appendChild(shareBtn);
-
+      // ✅ Eliminar del carrito: "Guardar para más tarde" y "Compartir"
       actions.appendChild(qtyRow);
       actions.appendChild(removeBtn);
-      actions.appendChild(links);
 
       info.appendChild(name);
-      info.appendChild(meta);
       info.appendChild(stock);
       info.appendChild(shipLine);
       info.appendChild(actions);

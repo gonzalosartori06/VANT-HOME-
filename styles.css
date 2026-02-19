@@ -1563,3 +1563,15 @@ html, body { overflow-x: hidden; }
   .results{ padding-top: 0 !important; }
   .results .topsearch--results{ margin-top: 0 !important; }
 }
+
+
+/* =========================
+   CART STOCK STATES
+   ========================= */
+.cartItem__stock{
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.cartItem__stock--ok{ color: #0a8f3d; } /* verde */
+.cartItem__stock--low{ color: #c10000; } /* rojo */
