@@ -70,9 +70,35 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 18px;
       }
+      /* 1) Ocultar el botón "Eliminar" extra (el que aparece abajo) */
+.cartItem__actions > .cartItem__remove{
+  display: none !important;
+}
+
+/* 2) Convertir el tacho DENTRO de la pastilla (el primer botón) en imagen */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  background-image: url("media/herramientas/basura-boton.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 18px 18px;
+
+  /* oculta el emoji 🗑 */
+  font-size: 0;
+  line-height: 0;
+}
+
       @media (max-width: 1200px){ .cartRecsGrid{ grid-template-columns: repeat(3, 1fr);} }
       @media (max-width: 900px){ .cartRecsGrid{ grid-template-columns: repeat(2, 1fr);} }
       @media (max-width: 520px){ .cartRecsGrid{ grid-template-columns: 1fr;} }
+    
+      /* ✅ Ocultar elementos marcados con X en el mock (checkbox y link "Eliminar") */
+      .cartItem__check{ display:none !important; }
+
+      /* ✅ Ajustar grilla del ítem cuando el checkbox está oculto */
+      .cartItem{
+        grid-template-columns: 110px minmax(0, 1fr) auto !important;
+      }
+
     </style>
   </head>
 
@@ -98,7 +124,8 @@
     <main class="page">
       <section class="cartPage">
         <h1 class="cartPage__title">Carrito de compras</h1>
-        <a class="cartTopLink" href="#" id="cartUnselectAll" onclick="return false;">Anular la selección de todos los elementos</a>
+        <hr class="cartPage__divider">
+
 
         <div class="cartPage__content">
           <div class="cartPage__items" id="cartItems"></div>
