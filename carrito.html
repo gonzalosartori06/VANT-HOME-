@@ -128,8 +128,19 @@
     <!-- MAIN -->
     <main class="page">
       <section class="cartPage">
-        <h1 class="cartPage__title">Carrito de compras</h1>
-        <hr class="cartPage__divider">
+      <div class="cartTitleBar">
+  <button class="cartTitleBar__back" type="button" onclick="history.back()" aria-label="Volver">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <h1 class="cartTitleBar__title">Mi carrito</h1>
+</div>
+
+<hr class="cartTitleBar__line">
+
+
 
 
         <div class="cartPage__content">

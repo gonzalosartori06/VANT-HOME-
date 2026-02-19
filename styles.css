@@ -1656,3 +1656,118 @@ html, body { overflow-x: hidden; }
   outline-offset: 2px;
   border-radius: 10px;
 }
+/* =========================
+   HEADER DEL CARRITO (flecha + título)
+   ========================= */
+
+.cartHeader{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+/* Flecha volver */
+.cartBackBtn{
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+
+  color: rgba(0,0,0,0.55); /* gris (NO rojo) */
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.cartBackBtn:hover{
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.75);
+}
+
+.cartBackBtn:focus-visible{
+  outline: 2px solid rgba(0,0,0,0.25);
+  outline-offset: 2px;
+}
+
+/* Ajuste fino del título */
+.cartPage__title{
+  margin: 0;
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+/* ===== TÍTULO CARRITO estilo screenshot ===== */
+
+.cartTitleBar{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 6px 0;
+}
+
+
+.cartTitleBar__back:hover{
+  color: rgba(0,0,0,0.75);
+}
+
+.cartTitleBar__back:focus-visible{
+  outline: 2px solid rgba(0,0,0,0.25);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+
+/* Línea finita (no barra gruesa) */
+.cartTitleBar__line{
+  border: 0;
+  height: 1px;
+  background: rgba(0,0,0,0.35);
+  margin: 10px 0 18px;
+}
+/* Ajuste fino del título "Mi carrito" */
+
+
+/* ===== FIX: alineación perfecta flecha + "Mi carrito" ===== */
+.cartTitleBar{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Botón con caja fija para centrar ópticamente */
+.cartTitleBar__back{
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: rgba(0,0,0,0.55);
+}
+
+/* SVG: micro ajuste óptico (clave) */
+.cartTitleBar__back svg{
+  width: 24px;
+  height: 24px;
+  display: block;
+  position: relative;
+  top: 1px; /* 👈 ajusta 1px para que quede perfecto */
+}
+
+/* Título: más fino + sin “aire” raro */
+.cartTitleBar__title{
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgba(0,0,0,0.75);
+
+  line-height: 1;
+  padding-top: 1px; /* 👈 acompaña el ajuste del SVG */
+}
