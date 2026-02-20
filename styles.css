@@ -1843,3 +1843,22 @@ html, body { overflow-x: hidden; }
 .cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:hover{
   background: rgba(0,0,0,0.07) !important;
 }
+
+.cartItem__img{
+  width: 100% !important;     /* 👈 se adapta a la columna (110px, 140px, etc.) */
+  max-width: 140px;           /* 👈 mantiene un “ideal” cuando hay espacio */
+  height: auto !important;
+  aspect-ratio: 1 / 1;        /* 👈 mantiene el cuadrado sin invadir el texto */
+
+  box-sizing: border-box;
+  object-fit: contain;
+  object-position: center;
+
+  background: #f4f4f4;
+  padding: 8px;
+  border-radius: 14px;
+}
+
+.cartItem{
+  grid-template-columns: 140px minmax(0, 1fr) auto !important;
+}
