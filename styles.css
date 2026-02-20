@@ -577,7 +577,7 @@ body{
 .filters__input{
   height: 40px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.10);
+  border: 1px solid rgba(0,0,0,0.16);
   padding: 0 10px;
   font-weight: 850;
   outline: none;
@@ -899,7 +899,6 @@ body{
 .cartItem{
   display:grid;
   grid-template-columns: 96px minmax(0, 1fr) auto;
-  gap: 16px;
   padding: 14px 0;
   border-bottom: 1px solid rgba(0,0,0,0.22);
 }
@@ -938,30 +937,36 @@ body{
 }
 
 .cartItem__remove{
-  width: 32px;
-  height: 32px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
+  width: 36px;
+  height: 36px;
+
+  display: inline-grid;
+  place-items: center;
+
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.14);
+  background-color: rgba(0,0,0,0.04);
 
   background-image: url("media/herramientas/basura-boton.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 85%;
+  background-size: 70%;
 
-  /* ocultamos texto sin romper accesibilidad */
+  cursor: pointer;
+
+  /* ocultar texto sin romper accesibilidad */
   font-size: 0;
 }
 
 .cartItem__remove:hover{
-  filter: brightness(1.1);
+  background-color: rgba(0,0,0,0.07);
 }
 
 .cartItem__remove:focus-visible{
   outline: 2px solid rgba(0,0,0,0.25);
   outline-offset: 2px;
-  border-radius: 8px;
 }
+
 
 
 .cartPage__summary{
@@ -1315,7 +1320,7 @@ body{
 
 .cartItem{
   grid-template-columns: 28px 110px minmax(0, 1fr) auto;
-  gap: 14px;
+  gap: 18px;   
   align-items: start;
 }
 
@@ -1463,9 +1468,6 @@ body{
   gap: 14px;
   align-items:center;
 }
-.cartItem__remove{
-  margin-top: 0;
-}
 .cartItem__link{
   font-size: 13px;
   font-weight: 700;
@@ -1507,18 +1509,6 @@ html, body { overflow-x: hidden; }
   gap: 14px;
   align-items:center;
 }
-
-/* “Eliminar” como link */
-.cartItem__remove{
-  border: 0;
-  background: transparent;
-  padding: 0;
-  font-weight: 800;
-  font-size: 13px;
-  color: rgba(0,0,0,0.62);
-  cursor: pointer;
-}
-.cartItem__remove:hover{ text-decoration: underline; }
 
 @media (max-width: 980px){
   .cartPage__content{ grid-template-columns: 1fr; }
@@ -1567,38 +1557,6 @@ html, body { overflow-x: hidden; }
 }
 
 
-.cartItem__remove{
-  font-size: 14px;
-}
-
-/* 🗑️ Botón eliminar producto (tacho con imagen) */
-.cartItem__remove{
-  width: 36px;
-  height: 36px;
-  border: 0;
-  padding: 0;
-  background-color: transparent;
-  background-image: url("media/herramientas/basura-boton.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 80%;
-  cursor: pointer;
-
-  /* ocultar texto sin romper accesibilidad */
-  font-size: 0;
-}
-
-/* Hover suave */
-.cartItem__remove:hover{
-  filter: brightness(1.1);
-}
-
-/* Focus accesible */
-.cartItem__remove:focus-visible{
-  outline: 2px solid rgba(0,0,0,0.25);
-  outline-offset: 2px;
-  border-radius: 10px;
-}
 /* =========================
    HEADER DEL CARRITO (flecha + título)
    ========================= */
@@ -1728,21 +1686,6 @@ html, body { overflow-x: hidden; }
   border: 1px solid rgba(0,0,0,0.10);
 }
 
-.cartQtyBtn{
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: #fff;
-  color: rgba(0,0,0,0.9);
-  font-size: 18px;
-  font-weight: 900;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-.cartQtyBtn:hover{ filter: brightness(1.03); }
 .cartQtyBtn:active{ transform: translateY(1px); }
 .cartQtyBtn:disabled{
   opacity: 0.35;
@@ -1781,3 +1724,122 @@ html, body { overflow-x: hidden; }
   scrollbar-gutter: stable;
 }
 
+/* =========================
+   CARRITO: más aire general
+   ========================= */
+.cartPage__items{
+  padding: 18px 20px;          /* antes: 14px 16px */
+}
+
+.cartItem{
+  padding: 18px 0;             /* antes: 14px 0 */                  /* antes: 16px / 14px en otras secciones */
+}
+
+.cartItem__name{
+  line-height: 1.25;           /* títulos más “respirados” */
+}
+
+/* un poquito más de separación antes de la pastilla */
+.cartItem__actions{
+  margin-top: 14px;            /* ya existía, le damos un toque más */
+  gap: 12px;                   /* si te queda muy suelto, bajalo a 10px */
+}
+
+/* =========================
+   CARRITO: pastilla de cantidad (mejor paleta)
+   ========================= */
+.cartQtyPill{
+  background: #fff;                          /* antes: rgba(0,0,0,0.04) */
+  border: 1px solid rgba(0,0,0,0.16);        /* más definido */
+  padding: 8px 12px;                      /* un toque más cómoda */
+  gap: 12px;                                 /* un poco menos “abierta” */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);   /* premium, sutil */
+}
+
+.cartQtyBtn{
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(0,0,0,0.14);
+  background: rgba(0,0,0,0.04);
+  color: rgba(0,0,0,0.88);
+
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cartQtyBtn:hover{
+  background: rgba(0,0,0,0.07);
+}
+/* =========================
+   CARRITO: imágenes con buena presencia
+   ========================= */
+.cartItem{
+  grid-template-columns: 28px 140px minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.cartItem__img{
+  width: 140px;
+  height: 140px;
+
+  object-fit: contain;      /* mantiene proporción */
+  object-position: center;
+
+  background: #f6f6f6;      /* “marco” sutil → no se ve flaca */
+  padding: 8px;             /* aire interno */
+  border-radius: 14px;
+}
+
+/* ✅ Carrito: que la columna de imagen tenga espacio real (evita choque con textos) */
+.cartItem{
+  grid-template-columns: 140px minmax(0, 1fr) auto !important;
+  gap: 18px !important;
+  align-items: start !important;
+}
+
+/* Imagen grande pero contenida dentro de su columna */
+.cartItem__img{
+  width: 140px !important;
+  height: 140px !important;
+  box-sizing: border-box;
+  object-fit: contain;
+  object-position: center;
+
+  /* marco sutil sin invadir el texto */
+  background: #f4f4f4;
+  padding: 8px;
+  border-radius: 14px;
+}
+
+/* ✅ Pastilla: todos los botones con el MISMO fondo claro (incluye tacho) */
+.cartQtyBtn,
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  background: rgba(0,0,0,0.04) !important;
+  border: 1px solid rgba(0,0,0,0.14) !important;
+  color: rgba(0,0,0,0.88) !important;
+}
+
+.cartQtyBtn:hover,
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:hover{
+  background: rgba(0,0,0,0.07) !important;
+}
+
+/* ✅ Pastilla: todos los botones con el MISMO fondo claro (incluye tacho) */
+.cartQtyBtn,
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  background: rgba(0,0,0,0.04) !important;
+  border: 1px solid rgba(0,0,0,0.14) !important;
+  color: rgba(0,0,0,0.88) !important;
+}
+
+.cartQtyBtn:hover,
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:hover{
+  background: rgba(0,0,0,0.07) !important;
+}
