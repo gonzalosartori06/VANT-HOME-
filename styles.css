@@ -932,17 +932,6 @@ body{
   align-items:center;
 }
 
-.cartQtyBtn{
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,0.25);
-  background:#fff;
-  cursor:pointer;
-  font-weight: 900;
-  font-size: 13px;
-}
-
 .cartItem__price{
   font-weight: 900;
   font-size: 16px;
@@ -1347,32 +1336,6 @@ body{
   font-size: 18px;
 }
 
-.cartQtyBtn{
-  width: 28px;
-  height: 28px;
-  font-size: 14px;
-  display:grid;
-  place-items:center;
-}
-
-/* pill contenedor para - qty + (más prolijo) */
-.cartQtyPill{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.72);
-}
-
-.cartQtyPill__qty{
-  min-width: 14px;
-  text-align:center;
-  font-weight: 900;
-  opacity: 0.9;
-}
-
 /* carrusel horizontal reusable */
 .cartCarousel{
   margin-top: 18px;
@@ -1602,27 +1565,6 @@ html, body { overflow-x: hidden; }
   margin: 8px 0 20px;
 }
 
-/* Contenedor del selector de cantidad */
-.cartQtyPill{
-  padding: 8px 14px;
-  gap: 14px;
-  border-radius: 999px;
-}
-
-/* Botones + y - */
-.cartQtyBtn{
-  width: 36px;
-  height: 36px;
-  font-size: 18px;
-  font-weight: 900;
-}
-
-/* Número de cantidad */
-.cartQtyPill__qty{
-  min-width: 26px;
-  font-size: 18px;
-  font-weight: 900;
-}
 
 .cartItem__remove{
   font-size: 14px;
@@ -1770,4 +1712,53 @@ html, body { overflow-x: hidden; }
 
   line-height: 1;
   padding-top: 1px; /* 👈 acompaña el ajuste del SVG */
+}
+/* =========================
+   Selector cantidad (pill) – como el mock
+   ========================= */
+.cartQtyPill{
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.10);
+}
+
+.cartQtyBtn{
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  color: rgba(0,0,0,0.9);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.cartQtyBtn:hover{ filter: brightness(1.03); }
+.cartQtyBtn:active{ transform: translateY(1px); }
+.cartQtyBtn:disabled{
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cartQtyPill__qty{
+  min-width: 26px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(0,0,0,0.88);
+}
+
+/* ✅ FIX: que la pastilla NO se estire dentro del grid */
+.cartItem__actions .cartQtyPill{
+  justify-self: start;     /* clave */
+  width: max-content;      /* clave */
 }

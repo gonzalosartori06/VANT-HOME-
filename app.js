@@ -13,6 +13,7 @@ const LEGACY_PRODUCTS = [
     description: "Notebook liviana para estudio y trabajo diario.",
     deal: true,
     discountPct: 18,
+    stockDisponible: 12
   },
   {
     id: "2",
@@ -22,6 +23,7 @@ const LEGACY_PRODUCTS = [
     image: "media/products/monitor_samsung.png",
     description: "Pantalla ideal para oficina y home office.",
     deal: false,
+    stockDisponible: 20
   },
   {
     id: "3",
@@ -32,6 +34,7 @@ const LEGACY_PRODUCTS = [
     description: "Combo inalámbrico cómodo y confiable.",
     deal: true,
     discountPct: 35,
+    stockDisponible: 15
   },
   {
     id: "4",
@@ -41,6 +44,7 @@ const LEGACY_PRODUCTS = [
     image: "media/products/impresora_hp.png",
     description: "Impresión y escaneo para el hogar.",
     deal: false,
+    stockDisponible: 8
   },
   {
     id: "5",
@@ -51,6 +55,7 @@ const LEGACY_PRODUCTS = [
     description: "Colores vivos y gran ángulo de visión.",
     deal: true,
     discountPct: 22,
+    stockDisponible: 9
   },
   {
     id: "6",
@@ -60,6 +65,7 @@ const LEGACY_PRODUCTS = [
     image: "media/products/ram_16gb.png",
     description: "Mejora el rendimiento de tu PC.",
     deal: false,
+    stockDisponible: 25
   },
   {
     id: "7",
@@ -70,6 +76,7 @@ const LEGACY_PRODUCTS = [
     description: "Más velocidad y mejor cobertura.",
     deal: true,
     discountPct: 28,
+    stockDisponible: 14
   },
   {
     id: "8",
@@ -79,6 +86,7 @@ const LEGACY_PRODUCTS = [
     image: "media/products/aspiradora.png",
     description: "Potente y liviana para el hogar.",
     deal: false,
+    stockDisponible: 10
   },
 ];
 
@@ -95,6 +103,7 @@ const NEW_PRODUCTS = [
     tag: "RTX 4060",
     imagen: "media/products/notebook_asus_gaming.png",
     descripcion: "Notebook gaming de alto rendimiento para 1080p/1440p.",
+    stockDisponible: 3
   },
   {
     id: "teclado-corsair-k65",
@@ -107,6 +116,7 @@ const NEW_PRODUCTS = [
     tag: "Wireless",
     imagen: "media/products/teclado_corsair_k65.png",
     descripcion: "Teclado compacto, ideal para setup gamer.",
+    stockDisponible: 12
   },
   {
     id: "auriculares-corsair-hs80",
@@ -119,6 +129,7 @@ const NEW_PRODUCTS = [
     tag: "7.1 Surround",
     imagen: "media/products/auriculares_corsair_hs80.png",
     descripcion: "Sonido envolvente para juegos y streaming.",
+    stockDisponible: 2
   },
   {
     id: "silla-razer-iskur-negra",
@@ -131,6 +142,7 @@ const NEW_PRODUCTS = [
     tag: "Peso máx. 136Kg",
     imagen: "media/products/silla_razer_iskur_negra.png",
     descripcion: "Ergonomía y soporte lumbar premium.",
+    stockDisponible: 5
   },
   {
     id: "silla-razer-iskur-gris",
@@ -143,6 +155,7 @@ const NEW_PRODUCTS = [
     tag: "Peso máx. 136Kg",
     imagen: "media/products/silla_razer_iskur_gris.png",
     descripcion: "Ergonomía premium para largas sesiones.",
+    stockDisponible: 4
   },
   {
     id: "auriculares-corsair-void",
@@ -155,6 +168,7 @@ const NEW_PRODUCTS = [
     tag: "Wireless 2.4Ghz",
     imagen: "media/products/auriculares_corsair_void.png",
     descripcion: "Wireless estable con buena batería.",
+    stockDisponible: 6
   },
 ];
 
@@ -213,14 +227,34 @@ function saveCart(cart) {
 
 function addToCart(productId, qty) {
   const cart = getCart();
-    // Normaliza carritos viejos: qty -> cantidad y ids numéricos -> legacy-*
-    cart.forEach((it) => {
-      if (it && it.qty != null && it.cantidad == null) it.cantidad = it.qty;
-      if (it && typeof it.id === 'number') it.id = String(it.id);
-    });
+
+  // Normaliza carritos viejos: qty -> cantidad y ids numéricos -> legacy-*
+  cart.forEach((it) => {
+    if (it && it.qty != null && it.cantidad == null) it.cantidad = it.qty;
+    if (it && typeof it.id === "number") it.id = String(it.id);
+  });
+
   const existing = cart.find((c) => c.id === productId);
-  if (existing) existing.cantidad += qty;
-  else cart.push({ id: productId, cantidad: qty });
+
+  // ✅ Tope de cantidad por producto:
+  // - mínimo: 1
+  // - máximo: 10
+  // - y nunca puede superar el stock disponible (si está definido)
+  const prod = BP_PRODUCTS.find((p) => p.id === productId);
+  const available = getProductAvailableStock(prod);
+  const maxAllowed = Math.max(
+    1,
+    Math.min(10, available != null ? Number(available) : 10)
+  );
+
+  const addN = Math.max(1, Number(qty) || 1);
+
+  if (existing) {
+    existing.cantidad = Math.min(maxAllowed, (Number(existing.cantidad) || 0) + addN);
+  } else {
+    cart.push({ id: productId, cantidad: Math.min(maxAllowed, addN) });
+  }
+
   saveCart(cart);
 }
 
@@ -233,22 +267,14 @@ function updateCartCount() {
 }
 
 // =============================
-// 1.x) STOCK (solo UI carrito)
+// 1.x) STOCK (catálogo)
 // =============================
-// Si un producto tiene `stockDisponible`, lo usamos.
-// Si no, usamos un mapa demo (para que funcione sin tocar tu catálogo).
-const BP_STOCK_DEMO = {
-  // ejemplo (podés ajustar/expandir ids)
-  "notebook-asus-gaming": 3,
-  "auriculares-corsair-hs80": 2,
-  "legacy-1": 4
-};
-
+// Usamos el stock REAL por producto (propiedad `stockDisponible`).
+// Si no existe, devolvemos null y la UI mostrará "Disponible".
 function getProductAvailableStock(prod) {
   if (!prod) return null;
   if (typeof prod.stockDisponible === "number") return prod.stockDisponible;
-  if (BP_STOCK_DEMO[prod.id] != null) return Number(BP_STOCK_DEMO[prod.id]);
-  return null; // null => asumimos stock normal (muestra "Disponible")
+  return null;
 }
 
 
@@ -1329,13 +1355,29 @@ function initCartPage() {
 
       removeIcon.onclick = removeItem;
 
+      // ✅ Clamp por reglas: min 1, max 10, y max stock (si existe)
+      const availableForQty = getProductAvailableStock(prod);
+      const maxAllowedQty = Math.max(
+        1,
+        Math.min(10, availableForQty != null ? Number(availableForQty) : 10)
+      );
+
+      if (item.cantidad > maxAllowedQty) item.cantidad = maxAllowedQty;
+
+      // ✅ Estados iniciales
+      minus.disabled = item.cantidad <= 1;
+      plus.disabled = item.cantidad >= maxAllowedQty;
+
+      // ✅ Flechas: no bajar de 1 (para eliminar se usa el tacho)
       minus.onclick = () => {
-        if (item.cantidad > 1) item.cantidad -= 1;
-        else removeItem();
+        if (item.cantidad <= 1) return;
+        item.cantidad -= 1;
         saveCart(cart);
       };
 
+      // ✅ Flecha +: no superar max(10, stock)
       plus.onclick = () => {
+        if (item.cantidad >= maxAllowedQty) return;
         item.cantidad += 1;
         saveCart(cart);
       };
