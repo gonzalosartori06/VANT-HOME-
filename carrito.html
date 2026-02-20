@@ -48,15 +48,15 @@
         font-size: 16px;
       }
       .cartSideRecs__track{
-        display:flex;
-        gap: 12px;
-        overflow:auto;
-        scroll-snap-type: x mandatory;
-        padding-bottom: 6px;
-      }
-      .cartSideRecs__track::-webkit-scrollbar{ height: 8px; }
-      .cartSideRecs__track::-webkit-scrollbar-thumb{ background: rgba(0,0,0,0.12); border-radius: 999px; }
-      .cartSideRecs__track .pcard{ flex: 0 0 220px; scroll-snap-align: start; }
+  display:flex;
+  gap: 12px;
+  overflow:auto;
+  scroll-snap-type: x mandatory;
+
+  padding-bottom: 40px;     
+  scrollbar-gutter: stable;
+}
+
 
       .cartRecsWrap{
   max-width: 1240px; /* 👈 mismo ancho que las secciones principales */
@@ -91,6 +91,71 @@
   font-size: 0;
   line-height: 0;
 }
+/* ✅ carrito.html: NO agrandar/mover cards ni labels al hover/click */
+.cartCarousel .pcard,
+.cartSideRecs__track .pcard{
+  transition: none !important;
+}
+
+.cartCarousel .pcard:hover,
+.cartCarousel .pcard:focus-within,
+.cartSideRecs__track .pcard:hover,
+.cartSideRecs__track .pcard:focus-within{
+  transform: none !important;          /* 👈 evita que “crezca / suba” */
+  border-color: rgba(0,0,0,0.26) !important;
+}
+
+.cartCarousel .pcard__img,
+.cartSideRecs__track .pcard__img{
+  transition: none !important;
+}
+
+.cartCarousel .pcard:hover .pcard__img,
+.cartCarousel .pcard:focus-within .pcard__img,
+.cartSideRecs__track .pcard:hover .pcard__img,
+.cartSideRecs__track .pcard:focus-within .pcard__img{
+  transform: none !important;          /* 👈 evita el zoom de imagen */
+}
+
+/* (por las dudas) que el tag/label nunca escale aunque alguien lo haya tocado */
+.cartCarousel .pcard__tag,
+.cartSideRecs__track .pcard__tag{
+  transform: none !important;
+}
+/* =================================================
+   carrito.html – Hover SOLO gris (sin mover ni escalar)
+   ================================================= */
+
+/* Quitamos cualquier animación heredada */
+.cartCarousel .pcard,
+.cartSideRecs__track .pcard{
+  transition: border-color 120ms ease, background-color 120ms ease !important;
+  transform: none !important;
+}
+
+/* Hover / focus: SOLO remarcar en gris */
+.cartCarousel .pcard:hover,
+.cartCarousel .pcard:focus-within,
+.cartSideRecs__track .pcard:hover,
+.cartSideRecs__track .pcard:focus-within{
+  transform: none !important;                 /* no se mueve */
+  border-color: rgba(0,0,0,0.45) !important;  /* gris más marcado */
+  background-color: rgba(0,0,0,0.02);         /* gris MUY suave */
+}
+
+/* Evitar zoom de imagen */
+.cartCarousel .pcard__img,
+.cartSideRecs__track .pcard__img{
+  transform: none !important;
+  transition: none !important;
+}
+
+/* El tag/label NO cambia tamaño ni posición */
+.cartCarousel .pcard__tag,
+.cartSideRecs__track .pcard__tag{
+  transform: none !important;
+}
+
 
       @media (max-width: 1200px){ .cartRecsGrid{ grid-template-columns: repeat(3, 1fr);} }
       @media (max-width: 900px){ .cartRecsGrid{ grid-template-columns: repeat(2, 1fr);} }

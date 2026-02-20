@@ -1762,3 +1762,20 @@ html, body { overflow-x: hidden; }
   justify-self: start;     /* clave */
   width: max-content;      /* clave */
 }
+
+
+/* =========================
+   FIX CARRUSEL (carrito): más alto por dentro para que NO se corten los tags
+   ========================= */
+.cartCarousel__track{
+  /* solo scroll horizontal */
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+
+  /* más aire abajo dentro del carrusel */
+  padding-bottom: 44px !important;
+
+  /* mantener el snap */
+  scroll-snap-type: x mandatory;
+  scrollbar-gutter: stable;
+}
