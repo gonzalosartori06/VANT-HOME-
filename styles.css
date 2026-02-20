@@ -901,7 +901,7 @@ body{
   grid-template-columns: 96px minmax(0, 1fr) auto;
   gap: 16px;
   padding: 14px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-bottom: 1px solid rgba(0,0,0,0.22);
 }
 
 .cartItem__img{
@@ -1325,15 +1325,16 @@ body{
   margin-top: 6px;
 }
 
+/* 🛒 Carrito: imágenes más grandes */
+.cartItem{
+  grid-template-columns: 28px 140px minmax(0, 1fr) auto;
+}
+
 .cartItem__img{
   width: 110px;
   height: 110px;
+  object-fit: contain;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.08);
-}
-
-.cartItem__price{
-  font-size: 18px;
 }
 
 /* carrusel horizontal reusable */
