@@ -1065,7 +1065,7 @@ body{
 /* ---- CARRITO PRO ---- */
 .cartPage__summary{
   position: sticky;
-  top: calc(var(--topbarH) + 18px);
+  top: 18px; /* ✅ el body ya tiene padding-top: var(--topbarH) */
 }
 
 .cartCoupon{
@@ -1779,3 +1779,4 @@ html, body { overflow-x: hidden; }
   scroll-snap-type: x mandatory;
   scrollbar-gutter: stable;
 }
+
