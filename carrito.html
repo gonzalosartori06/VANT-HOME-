@@ -82,12 +82,11 @@
 
 /* 2) Convertir el tacho DENTRO de la pastilla (el primer botón) en imagen */
 .cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
-  background-image: url("media/herramientas/basura-boton.png");
+  background-image: url("media/herramientas/boton-carrito.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 18px 18px;
 
-  /* oculta el emoji 🗑 */
   font-size: 0;
   line-height: 0;
 }
@@ -154,6 +153,111 @@
 .cartCarousel .pcard__tag,
 .cartSideRecs__track .pcard__tag{
   transform: none !important;
+}
+/* ✅ Botón eliminar de la pastilla: icono con ::before (NO lo pisa background:) */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  background-color: #0b0b0b !important; /* fondo negro */
+  border: 0 !important;
+
+  /* ocultar emoji/texto */
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+}
+
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]::before{
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: url("media/herramientas/boton-carrito.png") center / contain no-repeat;
+  display: block;
+}
+/* ✅ Eliminar duplicado: apagar cualquier background previo del botón */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  background-color: #0b0b0b !important;
+  background-image: none !important;   /* 🔑 apaga el icono “viejo” */
+  border: 0 !important;
+
+  /* oculta lo que haya adentro (emoji, texto, svg) */
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  overflow: hidden;
+}
+
+/* ✅ ÚNICO icono visible: el de la basura */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]::before{
+  content: "";
+  width: 18px;
+  height: 18px;
+
+  background-image: url("media/herramientas/basura-boton.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  display: block;
+}
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"] *{ display:none !important; }
+
+/* ✅ Eliminar: mismo look que los otros botones de la pastilla (NO negro) */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  /* 🔑 Igual que los demás botones */
+  background-color: rgba(0,0,0,0.04) !important;
+  border: 1px solid rgba(0,0,0,0.14) !important;
+
+  /* evita duplicados */
+  background-image: none !important;
+
+  /* ocultar cualquier contenido interno */
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  overflow: hidden;
+}
+
+/* hover igual que los demás */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:hover{
+  background-color: rgba(0,0,0,0.07) !important;
+}
+
+/* ✅ Icono basura: más grande y centrado ópticamente */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]::before{
+  content: "";
+  width: 22px;              /* más grande */
+  height: 22px;
+
+  background: url("media/herramientas/basura-boton.png") center / contain no-repeat;
+  display: block;
+
+  transform: translateY(0.5px); /* micro ajuste de centrado */
+}
+
+/* por si el botón trae un svg/emoji adentro */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"] *{
+  display: none !important;
 }
 
 

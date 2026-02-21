@@ -1819,29 +1819,31 @@ html, body { overflow-x: hidden; }
 }
 
 /* ✅ Pastilla: todos los botones con el MISMO fondo claro (incluye tacho) */
-.cartQtyBtn,
-.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
-  background: rgba(0,0,0,0.04) !important;
-  border: 1px solid rgba(0,0,0,0.14) !important;
-  color: rgba(0,0,0,0.88) !important;
-}
-
 .cartQtyBtn:hover,
 .cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:hover{
-  background: rgba(0,0,0,0.07) !important;
+  background-color: rgba(0,0,0,0.07) !important;
 }
 
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  background-color: #0b0b0b !important;
+  background-image: url("media/herramientas/boton-carrito.png") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 65% !important;
+
+  font-size: 0;
+  line-height: 0;
+}
 /* ✅ Pastilla: todos los botones con el MISMO fondo claro (incluye tacho) */
 .cartQtyBtn,
 .cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
-  background: rgba(0,0,0,0.04) !important;
+  background-color: rgba(0,0,0,0.04) !important;
   border: 1px solid rgba(0,0,0,0.14) !important;
   color: rgba(0,0,0,0.88) !important;
-}
-
-.cartQtyBtn:hover,
-.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:hover{
-  background: rgba(0,0,0,0.07) !important;
 }
 
 .cartItem__img{
@@ -1861,4 +1863,38 @@ html, body { overflow-x: hidden; }
 
 .cartItem{
   grid-template-columns: 140px minmax(0, 1fr) auto !important;
+}
+
+/* 🗑 Botón eliminar DENTRO de la pastilla de cantidad */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]{
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  background-color: #0b0b0b; /* mismo negro que sumar */
+  background-image: url("media/herramientas/boton-carrito.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 65%;
+
+  border: none;
+  cursor: pointer;
+
+  /* ocultar emoji o texto sin romper accesibilidad */
+  font-size: 0;
+  line-height: 0;
+}
+
+/* hover sutil */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:hover{
+  filter: brightness(1.1);
+}
+
+/* focus accesible */
+.cartQtyPill > .cartQtyBtn[aria-label="Eliminar"]:focus-visible{
+  outline: 2px solid rgba(0,0,0,0.35);
+  outline-offset: 2px;
+}
+.cartItem__actions > .cartItem__remove{
+  display: none !important;
 }
