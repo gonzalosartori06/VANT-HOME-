@@ -48,7 +48,22 @@
     <!-- MAIN -->
     <main class="page">
       <section class="productDetail" id="productDetail">
-        <!-- Se rellena por JS según ?id= -->
+        <!-- Se rellena por JS según ?id=
+             (dejamos estructura base para mantener la misma "grilla" del diseño) -->
+        <div class="productPage" aria-hidden="true" style="opacity:.0; height:0; overflow:hidden;">
+          <div class="productPage__gallery">
+            <div class="productHero"></div>
+            <div class="productThumbs"></div>
+          </div>
+          <div class="productPage__side">
+            <div class="productCrumb"></div>
+            <h1 class="productTitle"></h1>
+            <div class="productMetaChips"></div>
+            <div class="productPriceCard"></div>
+            <div class="productBullets"></div>
+            <button class="productCta" type="button"></button>
+          </div>
+        </div>
       </section>
     </main>
 

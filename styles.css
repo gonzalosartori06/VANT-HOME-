@@ -780,6 +780,254 @@ body{
   gap: 32px;
 }
 
+/* =========================
+   PRODUCTO (layout tipo "tienda" del mock)
+   - No usa naranja
+   - Gris/negro/blanco como el resto del sitio
+   ========================= */
+
+/* contenedor principal (reemplaza el look anterior sin romper otras páginas) */
+.productPage{
+  max-width: 1240px;
+  margin: 24px auto 44px;
+  padding: 0 var(--sides);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 22px;
+}
+
+.productPage__gallery{ min-width: 0; }
+
+.productHero{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.productHero__img{
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+}
+
+.productThumbs{
+  margin-top: 12px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.productThumb{
+  width: 92px;
+  height: 92px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.10);
+  background: #fff;
+  cursor: pointer;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.productThumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.productThumb.is-active{
+  border-color: rgba(0,0,0,0.45);
+}
+
+.productPage__side{
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.productCrumb{
+  font-weight: 750;
+  color: rgba(0,0,0,0.55);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.productCrumb a{
+  color: rgba(0,0,0,0.55);
+  text-decoration: none;
+}
+
+.productCrumb a:hover{ text-decoration: underline; }
+
+.productCrumb strong{ color: rgba(0,0,0,0.75); }
+
+.productTitle{
+  margin: 0;
+  font-size: 34px;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.productMetaChips{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip{
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.70);
+  font-size: 13px;
+}
+
+.chip b{ color: rgba(0,0,0,0.85); }
+
+.productPriceCard{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.priceCard__row{ padding: 14px 16px; }
+.priceCard__sep{ height: 1px; background: rgba(0,0,0,0.08); }
+
+.priceCard__label{
+  font-weight: 900;
+  color: rgba(0,0,0,0.70);
+  margin-bottom: 6px;
+}
+
+.priceCard__price{
+  font-size: 34px;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  color: #0b0b0b;
+  margin-bottom: 6px;
+}
+
+.priceCard__note{
+  color: rgba(0,0,0,0.60);
+  font-weight: 650;
+  font-size: 14px;
+}
+
+.priceCard__sub{
+  margin-top: 4px;
+  color: rgba(0,0,0,0.45);
+  font-weight: 750;
+  font-size: 13px;
+}
+
+.priceCard__sub span{ color: rgba(0,0,0,0.55); }
+
+.priceCard__row--alt{
+  background: rgba(0,0,0,0.02);
+  position: relative;
+}
+
+.priceCard__link{
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  color: #1a73e8;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.priceCard__link:hover{ text-decoration: underline; }
+
+.priceCard__badges{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.payBadge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  font-weight: 900;
+  color: rgba(0,0,0,0.70);
+  font-size: 12px;
+}
+
+.priceCard__install{
+  margin-top: 8px;
+  font-weight: 750;
+  color: rgba(0,0,0,0.65);
+}
+
+.productBullets{
+  display: grid;
+  gap: 8px;
+}
+
+.pBullet{
+  font-weight: 750;
+  color: rgba(0,0,0,0.70);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.pBullet a{
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.pBullet a:hover{ text-decoration: underline; }
+
+.pBullet--ok{ color: #0a8f3d; }
+
+.productCta{
+  margin-top: 6px;
+  width: 100%;
+  height: 52px;
+  border-radius: 14px;
+  border: 0;
+  background: #0b0b0b; /* ✅ negro (sin naranja) */
+  color: #fff;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.productCta:hover{ filter: brightness(1.08); }
+
+.productCta--ghost{
+  margin-top: 0;
+  background: #fff;
+  color: #0b0b0b;
+  border: 1px solid rgba(0,0,0,0.16);
+}
+
+.productCta--ghost:hover{ background: rgba(0,0,0,0.03); }
+
+@media (max-width: 980px){
+  .productPage{ grid-template-columns: 1fr; }
+  .productTitle{ font-size: 28px; }
+}
+
 .productDetail__media{
   background:#fff;
   border-radius: 16px;
@@ -1897,4 +2145,12 @@ html, body { overflow-x: hidden; }
 }
 .cartItem__actions > .cartItem__remove{
   display: none !important;
+}
+
+/* ✅ FIX: producto.html se veía angosto porque .productDetail es un grid de 2 columnas */
+#productDetail.productDetail{
+  display: block;      /* deja de ser grid */
+  max-width: none;     /* no limita el ancho */
+  padding: 0;          /* el padding ya lo maneja .productPage */
+  margin: 0;           /* el margin ya lo maneja .productPage */
 }

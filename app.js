@@ -1055,116 +1055,111 @@ function initProductDetail() {
   const container = document.getElementById("productDetail");
   if (!container) return;
 
+  // helpers (evita romper HTML si hay comillas)
+  const escapeHtml = (s) =>
+    String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const escapeAttr = (s) => escapeHtml(s);
+
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id");
   const prod = BP_PRODUCTS.find((p) => p.id === id) || BP_PRODUCTS[0];
   if (!prod) return;
 
-  container.innerHTML = "";
+  // ✅ Render tipo "tienda" (como tu mock) y SIN cuotas.
+  const bestPrice = Number(prod.precio) || 0;
 
-  const media = document.createElement("div");
-  media.className = "cartItem__media";
-
-  const img = document.createElement("img");
-  img.className = "productDetail__img";
-  img.src = prod.imagen;
-  img.alt = prod.nombre;
-
-  media.appendChild(img);
-
-  const info = document.createElement("div");
-
-  const title = document.createElement("h1");
-  title.className = "productDetail__infoTitle";
-  title.textContent = prod.nombre;
-
-  const priceRow = document.createElement("div");
-  priceRow.className = "productDetail__priceRow";
-
-  const priceNow = document.createElement("div");
-  priceNow.className = "productDetail__priceNow";
-  priceNow.textContent = formatPrice(prod.precio);
-
-  priceRow.appendChild(priceNow);
-
-  if (prod.precioAntes) {
-    const was = document.createElement("div");
-    was.className = "productDetail__priceWas";
-    was.textContent = formatPrice(prod.precioAntes);
-    priceRow.appendChild(was);
-  }
-
-  const tag = document.createElement("div");
-  tag.className = "productDetail__tag";
-  tag.textContent = `${prod.marca} · ${prod.categoria}`;
-
-  const btnRow = document.createElement("div");
-  btnRow.className = "productDetail__btnRow";
-
-  const addBtn = document.createElement("button");
-  addBtn.className = "btnPrimary";
-  addBtn.type = "button";
-  addBtn.textContent = "Agregar al carrito";
-  addBtn.onclick = () => addToCart(prod.id, 1);
-
-  const goCartBtn = document.createElement("button");
-  goCartBtn.className = "btnSecondary";
-  goCartBtn.type = "button";
-  goCartBtn.textContent = "Ir al carrito";
-  goCartBtn.onclick = () => (window.location.href = "carrito.html");
-
-  btnRow.appendChild(addBtn);
-  btnRow.appendChild(goCartBtn);
-
-  // Buy box + tabs (usa tu CSS actual)
-  const buyBox = document.createElement("div");
-  buyBox.className = "productDetail__buyBox";
-  buyBox.innerHTML = `
-    <div class="kvRow"><span class="kvKey">Marca</span><span class="kvVal">${prod.marca}</span></div>
-    <div class="kvRow"><span class="kvKey">Categoría</span><span class="kvVal">${prod.categoria}</span></div>
-    <div class="kvRow"><span class="kvKey">Stock</span><span class="kvVal">Disponible</span></div>
-    <div class="kvRow"><span class="kvKey">Envío</span><span class="kvVal">24/48 hs (demo)</span></div>
+  // Breadcrumb simple (Productos > Categoría > Marca)
+  const crumb = `
+    <a href="productos.html">Productos</a>
+    <span>›</span>
+    <strong>${escapeHtml(prod.categoria || "Producto")}</strong>
+    <span>›</span>
+    <strong>${escapeHtml(prod.marca || "Marca")}</strong>
   `;
 
-  const tabs = document.createElement("div");
-  tabs.className = "productTabs";
-  tabs.innerHTML = `
-    <div class="productTabs__head">
-      <button class="tabBtn is-active" data-tab="desc" type="button">Descripción</button>
-      <button class="tabBtn" data-tab="specs" type="button">Especificaciones</button>
-      <button class="tabBtn" data-tab="warranty" type="button">Garantía</button>
+  // SKU/ID (demo)
+  const sku = `${(prod.marca || "BP").slice(0, 2).toUpperCase()}-${String(prod.id).toUpperCase()}`;
+  const internalId = String(prod.id).slice(-5).toUpperCase();
+
+  container.innerHTML = `
+    <div class="productPage">
+      <div class="productPage__gallery">
+        <div class="productHero">
+          <img class="productHero__img" id="productHeroImg" src="${escapeAttr(prod.imagen)}" alt="${escapeAttr(prod.nombre)}" />
+        </div>
+
+        <div class="productThumbs" id="productThumbs">
+          <button class="productThumb is-active" type="button" aria-label="Miniatura 1">
+            <img src="${escapeAttr(prod.imagen)}" alt="${escapeAttr(prod.nombre)}" />
+          </button>
+          <button class="productThumb" type="button" aria-label="Miniatura 2">
+            <img src="${escapeAttr(prod.imagen)}" alt="${escapeAttr(prod.nombre)}" />
+          </button>
+        </div>
+      </div>
+
+      <div class="productPage__side">
+        <div class="productCrumb">${crumb}</div>
+
+        <h1 class="productTitle">${escapeHtml(prod.nombre)}</h1>
+
+        <div class="productMetaChips">
+          <span class="chip"><b>SKU:</b> ${escapeHtml(sku)}</span>
+          <span class="chip"><b>ID:</b> ${escapeHtml(internalId)}</span>
+        </div>
+
+        <!-- ✅ ÚNICO bloque de precio (Mejor precio) -->
+        <div class="productPriceCard">
+          <div class="priceCard__row">
+            <div class="priceCard__label">Mejor precio</div>
+            <div class="priceCard__price">${formatPrice(bestPrice)}</div>
+            <div class="priceCard__note">Incluye <b>5%</b> de descuento por pago con depósito o transferencia.</div>
+            <div class="priceCard__sub">Precio s/imp. nac. <span>${formatPrice(Math.round(bestPrice * 0.83))}</span></div>
+          </div>
+        </div>
+
+        <div class="productBullets">
+          <div class="pBullet pBullet--ok">✓ Stock disponible</div>
+          <div class="pBullet">🛡 Garantía - 24 meses <a href="#" onclick="return false;">Ver términos y condiciones</a></div>
+          <div class="pBullet">🚚 Envíos a todo el país.</div>
+        </div>
+
+        <button class="productCta" id="addToCartBtn" type="button">Sumar al carrito</button>
+        <button class="productCta productCta--ghost" id="goCartBtn" type="button">Ir al carrito</button>
+      </div>
     </div>
-    <div class="productTabs__body" id="tabBody">${prod.descripcion || "Producto demo."}</div>
   `;
 
-  tabs.addEventListener("click", (e) => {
-    const btn = e.target.closest(".tabBtn");
-    if (!btn) return;
+  // ✅ Acciones
+  const addBtn = document.getElementById("addToCartBtn");
+  if (addBtn) addBtn.addEventListener("click", () => addToCart(prod.id, 1));
 
-    tabs.querySelectorAll(".tabBtn").forEach((b) => b.classList.remove("is-active"));
-    btn.classList.add("is-active");
+  const goCartBtn = document.getElementById("goCartBtn");
+  if (goCartBtn) goCartBtn.addEventListener("click", () => (window.location.href = "carrito.html"));
 
-    const body = tabs.querySelector("#tabBody");
-    const tab = btn.dataset.tab;
+  // ✅ Galería simple (misma imagen x2 por ahora)
+  const heroImg = document.getElementById("productHeroImg");
+  const thumbs = document.getElementById("productThumbs");
 
-    if (tab === "desc") body.textContent = prod.descripcion || "Producto demo.";
-    if (tab === "specs")
-      body.textContent = "Specs demo: CPU / RAM / Almacenamiento / Conectividad / etc.";
-    if (tab === "warranty")
-      body.textContent = "Garantía demo: 12 meses con fabricante / tienda.";
-  });
+  if (heroImg && thumbs) {
+    thumbs.addEventListener("click", (e) => {
+      const btn = e.target.closest(".productThumb");
+      if (!btn) return;
 
-  info.appendChild(title);
-  info.appendChild(priceRow);
-  info.appendChild(tag);
-  info.appendChild(btnRow);
-  info.appendChild(buyBox);
-  info.appendChild(tabs);
+      thumbs.querySelectorAll(".productThumb").forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
 
-  container.appendChild(media);
-  container.appendChild(info);
+      const img = btn.querySelector("img");
+      if (img && img.src) heroImg.src = img.src;
+    });
+  }
 }
-
 // =============================
 // 9) CARRITO (Amazon-like + recomendaciones similares)
 // =============================
