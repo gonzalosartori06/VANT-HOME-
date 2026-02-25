@@ -65,6 +65,50 @@
           </div>
         </div>
       </section>
+      <main class="page">
+  <section class="productDetail" id="productDetail">
+    <!-- ... LO QUE YA TENÉS ACÁ NO LO TOQUES ... -->
+  </section>
+
+  <!-- ✅ Carrusel de productos recomendados -->
+  <section class="productRecsWrap">
+    <div
+      class="cartCarousel productRecs"
+      id="productRecs"
+      aria-label="Productos recomendados"
+    >
+      <div class="cartCarousel__head">
+        <h2 class="cartCarousel__title">Productos recomendados para vos</h2>
+        <div class="cartCarousel__ctrls">
+          <button
+            class="cartCarousel__btn"
+            type="button"
+            data-carousel="productRecsTrack"
+            data-dir="-1"
+            aria-label="Anterior"
+          >
+            ‹
+          </button>
+          <button
+            class="cartCarousel__btn"
+            type="button"
+            data-carousel="productRecsTrack"
+            data-dir="1"
+            aria-label="Siguiente"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="cartCarousel__track"
+        id="productRecsTrack"
+        aria-label="Lista de productos recomendados"
+      ></div>
+    </div>
+  </section>
+</main>
     </main>
 
     <!-- FOOTER -->

@@ -2154,3 +2154,17 @@ html, body { overflow-x: hidden; }
   padding: 0;          /* el padding ya lo maneja .productPage */
   margin: 0;           /* el margin ya lo maneja .productPage */
 }
+
+/* Carrusel de recomendados debajo del producto */
+.productRecsWrap{
+  max-width: 1240px;
+  margin: 0 auto 44px;
+  padding: 0 var(--sides);
+}
+
+/* (opcional) ajustar título del carrusel en detalle */
+.productRecs .cartCarousel__title{
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}

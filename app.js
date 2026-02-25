@@ -204,6 +204,28 @@ function formatPrice(n) {
   return "$" + n.toLocaleString("es-AR");
 }
 
+// =============================
+// 1.b) CONTROLES DE CARRUSEL (reutilizable)
+// =============================
+function initCarouselControls() {
+  // Evita duplicar listeners si el script se carga más de una vez
+  if (window.__bpCarouselBound) return;
+  window.__bpCarouselBound = true;
+
+  // Delegación: funciona para cualquier botón con data-carousel / data-dir
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-carousel]");
+    if (!btn) return;
+
+    const trackId = btn.getAttribute("data-carousel");
+    const dir = Number(btn.getAttribute("data-dir") || "1");
+    const track = document.getElementById(trackId);
+    if (!track) return;
+
+    track.scrollBy({ left: dir * 320, behavior: "smooth" });
+  });
+}
+
 function getCart() {
   try {
     return JSON.parse(localStorage.getItem("bp_cart") || "[]");
@@ -1159,6 +1181,29 @@ function initProductDetail() {
       if (img && img.src) heroImg.src = img.src;
     });
   }
+
+  // ✅ Carrusel de recomendados (debajo del producto)
+  const recTrack = document.getElementById("productRecsTrack");
+  const recWrap = document.getElementById("productRecs");
+  if (recTrack) {
+    // prioriza misma categoría / marca, luego ofertas
+    function score(p) {
+      let s = 0;
+      if (p.categoria && prod.categoria && p.categoria === prod.categoria) s += 3;
+      if (p.marca && prod.marca && p.marca === prod.marca) s += 2;
+      if (p.oferta) s += 1;
+      return s;
+    }
+
+    const pool = BP_PRODUCTS.filter((p) => p.id !== prod.id);
+    pool.sort((a, b) => score(b) - score(a));
+    const recs = pool.slice(0, 10);
+
+    recTrack.innerHTML = "";
+    recs.forEach((p) => recTrack.appendChild(createProductCard(p)));
+
+    if (recWrap) recWrap.hidden = recs.length === 0;
+  }
 }
 // =============================
 // 9) CARRITO (Amazon-like + recomendaciones similares)
@@ -1181,18 +1226,6 @@ function initCartPage() {
       });
     });
   }
-
-  // ✅ Controles de carrusel (botones ‹ ›)
-  document.querySelectorAll('[data-carousel]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const trackId = btn.getAttribute('data-carousel');
-      const dir = Number(btn.getAttribute('data-dir') || '1');
-      const track = document.getElementById(trackId);
-      if (!track) return;
-      track.scrollBy({ left: dir * 320, behavior: 'smooth' });
-    });
-  });
-
 
   // ✅ Recomendaciones: prioriza misma categoría/marca que lo del carrito
   function buildSimilarRecs(cartProds, limit = 8) {
@@ -1471,6 +1504,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initHeader();
   initSearch();
   initFooterCategories();
+  initCarouselControls();
 
   if (document.getElementById("heroCarousel")) initHome();
   if (document.querySelector(".shopLayout")) initProductsPage();
