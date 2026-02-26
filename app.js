@@ -639,11 +639,25 @@ function initProductsPage() {
   const q = params.get("q");
   if (q) filterState.query = q.trim();
 
+  // ✅ toma filtros desde URL (para breadcrumbs / links compartibles)
+  // Soporta: ?cat=Notebooks&brand=ASUS (y aliases ?categoria= / ?marca=)
+  const catFromUrl = params.get("cat") || params.get("categoria");
+  const brandFromUrl = params.get("brand") || params.get("marca");
+  if (catFromUrl) filterState.categoria = catFromUrl.trim();
+  if (brandFromUrl) filterState.marca = brandFromUrl.trim();
+
   // ✅ si venís del footer
   const storedCat = sessionStorage.getItem("bp_categoryFilter");
   if (storedCat) {
     filterState.categoria = storedCat;
     sessionStorage.removeItem("bp_categoryFilter");
+  }
+
+  // ✅ si venís del breadcrumb del producto (o cualquier link que setee sessionStorage)
+  const storedBrand = sessionStorage.getItem("bp_brandFilter");
+  if (storedBrand) {
+    filterState.marca = storedBrand;
+    sessionStorage.removeItem("bp_brandFilter");
   }
 
   // ✅ refleja query en input si existe
@@ -1122,13 +1136,39 @@ function initProductDetail() {
   // ✅ Render tipo "tienda" (como tu mock) y SIN cuotas.
   const bestPrice = Number(prod.precio) || 0;
 
-  // Breadcrumb simple (Productos > Categoría > Marca)
+  // Breadcrumb navegable (Productos > Categoría > Marca)
+  // 👉 lleva a productos.html con los filtros aplicados via querystring
+  const cat = String(prod.categoria || "").trim();
+  const brand = String(prod.marca || "").trim();
+
+  const urlProducts = "productos.html";
+  const urlCat = cat ? `productos.html?cat=${encodeURIComponent(cat)}` : urlProducts;
+  const urlCatBrand =
+    cat && brand
+      ? `productos.html?cat=${encodeURIComponent(cat)}&brand=${encodeURIComponent(brand)}`
+      : brand
+      ? `productos.html?brand=${encodeURIComponent(brand)}`
+      : urlProducts;
+
+  // ✅ Además de la URL, guardamos filtros en sessionStorage para que funcione
+  // incluso si el usuario tiene cache viejo o si el navegador “limpia” querystrings.
+  const catJS = JSON.stringify(cat);
+  const brandJS = JSON.stringify(brand);
+
   const crumb = `
-    <a href="productos.html">Productos</a>
+    <a href="${urlProducts}" onclick="try{sessionStorage.removeItem('bp_categoryFilter');sessionStorage.removeItem('bp_brandFilter');}catch{}">Productos</a>
     <span>›</span>
-    <strong>${escapeHtml(prod.categoria || "Producto")}</strong>
+    ${
+      cat
+        ? `<a href="${urlCat}" onclick="try{sessionStorage.setItem('bp_categoryFilter', ${catJS});sessionStorage.removeItem('bp_brandFilter');}catch{}">${escapeHtml(cat)}</a>`
+        : `<strong>Producto</strong>`
+    }
     <span>›</span>
-    <strong>${escapeHtml(prod.marca || "Marca")}</strong>
+    ${
+      brand
+        ? `<a href="${urlCatBrand}" onclick="try{${cat ? `sessionStorage.setItem('bp_categoryFilter', ${catJS});` : "sessionStorage.removeItem('bp_categoryFilter');"}sessionStorage.setItem('bp_brandFilter', ${brandJS});}catch{}">${escapeHtml(brand)}</a>`
+        : `<strong>Marca</strong>`
+    }
   `;
 
   // SKU/ID (demo)
