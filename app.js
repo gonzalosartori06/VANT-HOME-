@@ -190,6 +190,7 @@ function normalizeLegacy(p) {
     tag: p.badge,
     imagen: p.image,
     descripcion: p.description || "Producto destacado (demo).",
+    stockDisponible: typeof p.stockDisponible === "number" ? p.stockDisponible : undefined,
   };
 }
 
@@ -298,7 +299,6 @@ function getProductAvailableStock(prod) {
   if (typeof prod.stockDisponible === "number") return prod.stockDisponible;
   return null;
 }
-
 
 // =============================
 // 1.1) SEARCH (normalización + fuzzy)
@@ -855,7 +855,6 @@ function initFooterCategories() {
 // =============================
 // 7) BUSCADOR (tiempo real + fuzzy) + ✅ BOTÓN CLEAR (X)
 // =============================
-
 function injectSearchClearStylesOnce() {
   if (document.getElementById("bp-search-clear-style")) return;
   const style = document.createElement("style");
@@ -1185,26 +1184,41 @@ function initProductDetail() {
   // ✅ Carrusel de recomendados (debajo del producto)
   const recTrack = document.getElementById("productRecsTrack");
   const recWrap = document.getElementById("productRecs");
+
   if (recTrack) {
-    // prioriza misma categoría / marca, luego ofertas
-    function score(p) {
-      let s = 0;
-      if (p.categoria && prod.categoria && p.categoria === prod.categoria) s += 3;
-      if (p.marca && prod.marca && p.marca === prod.marca) s += 2;
-      if (p.oferta) s += 1;
-      return s;
-    }
-
-    const pool = BP_PRODUCTS.filter((p) => p.id !== prod.id);
-    pool.sort((a, b) => score(b) - score(a));
-    const recs = pool.slice(0, 10);
-
     recTrack.innerHTML = "";
+
+    // 1) misma categoría
+    const sameCategory = BP_PRODUCTS.filter(
+      (p) => p.id !== prod.id && p.categoria === prod.categoria
+    );
+
+    // 2) misma marca (prioriza los que NO son misma categoría para no repetir demasiado)
+    const sameBrand = BP_PRODUCTS.filter(
+      (p) =>
+        p.id !== prod.id &&
+        p.categoria !== prod.categoria &&
+        p.marca === prod.marca
+    );
+
+    // 3) resto como relleno
+    const fallback = BP_PRODUCTS.filter(
+      (p) =>
+        p.id !== prod.id &&
+        p.categoria !== prod.categoria &&
+        p.marca !== prod.marca
+    );
+
+    const ordered = [...sameCategory, ...sameBrand, ...fallback];
+    const recs = ordered.slice(0, 10);
+
     recs.forEach((p) => recTrack.appendChild(createProductCard(p)));
 
+    // si por algún motivo no hay recomendados, oculto el bloque
     if (recWrap) recWrap.hidden = recs.length === 0;
   }
 }
+
 // =============================
 // 9) CARRITO (Amazon-like + recomendaciones similares)
 // =============================
@@ -1286,16 +1300,16 @@ function initCartPage() {
     let subtotal = 0;
 
     cart.forEach((item) => {
-  let prod = BP_PRODUCTS.find((p) => p.id === item.id);
+      let prod = BP_PRODUCTS.find((p) => p.id === item.id);
 
-  // ✅ compatibilidad con carritos viejos: "1" -> "legacy-1"
-  if (!prod && typeof item.id === "string" && /^\d+$/.test(item.id)) {
-    const legacyId = `legacy-${item.id}`;
-    prod = BP_PRODUCTS.find((p) => p.id === legacyId);
-    if (prod) item.id = legacyId;
-  }
+      // ✅ compatibilidad con carritos viejos: "1" -> "legacy-1"
+      if (!prod && typeof item.id === "string" && /^\d+$/.test(item.id)) {
+        const legacyId = `legacy-${item.id}`;
+        prod = BP_PRODUCTS.find((p) => p.id === legacyId);
+        if (prod) item.id = legacyId;
+      }
 
-        if (!prod) return;
+      if (!prod) return;
 
       // ✅ normalizar cantidad (compatibilidad)
       if (item.cantidad == null) item.cantidad = item.qty ?? item.quantity ?? 1;
@@ -1304,10 +1318,10 @@ function initCartPage() {
 
       cartProds.push(prod);
 
-  const row = document.createElement("div");
-  row.className = "cartItem";
+      const row = document.createElement("div");
+      row.className = "cartItem";
 
-  // Checkbox + imagen (alineado al grid del CSS)
+      // Checkbox + imagen (alineado al grid del CSS)
       const check = document.createElement("input");
       check.type = "checkbox";
       check.checked = true;
@@ -1318,7 +1332,6 @@ function initCartPage() {
       img.className = "cartItem__img";
       img.src = prod.imagen;
       img.alt = prod.nombre;
-
 
       const info = document.createElement("div");
 
@@ -1468,7 +1481,6 @@ function initCartPage() {
     gift.style.alignItems = "center";
     gift.style.gap = "10px";
     gift.style.margin = "10px 0 12px";
-    
 
     const payBtn = document.createElement("button");
     payBtn.className = "btnPrimary";

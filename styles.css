@@ -2168,3 +2168,23 @@ html, body { overflow-x: hidden; }
   font-weight: 900;
   letter-spacing: -0.03em;
 }
+
+/* =========================================
+   producto.html – SIN zoom en carrusel
+   ========================================= */
+
+.productRecs .pcard,
+.productRecs .pcard__img{
+  transition: none !important;
+}
+
+.productRecs .pcard:hover,
+.productRecs .pcard:focus-within{
+  transform: none !important;
+}
+
+.productRecs .pcard:hover .pcard__img,
+.productRecs .pcard:focus-within .pcard__img{
+  border-color: rgba(0,0,0,0.75);
+  transform: none !important;
+}
