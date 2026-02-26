@@ -796,29 +796,40 @@ body{
   gap: 22px;
 }
 
-.productPage__gallery{ min-width: 0; }
+.productPage__gallery{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* ajustá si querés más/menos */
+  gap: 14px;
+}
 
-.productHero{
+.productHero,
+.productThumb{
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.10);
-  border-radius: 18px;
-  padding: 18px;
+  border: 2px solid rgba(0,0,0,0.10);
   display: grid;
   place-items: center;
+  padding: 10px;
+}
+
+.productHero__img,
+.productThumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.productHero{
+  border-color: rgba(0,0,0,0.45); /* activa */
 }
 
 .productHero__img{
   width: 100%;
-  max-height: 520px;
+  max-height: 420px;
   object-fit: contain;
 }
 
-.productThumbs{
-  margin-top: 12px;
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
 
 .productThumb{
   width: 92px;
@@ -2187,4 +2198,248 @@ html, body { overflow-x: hidden; }
 .productRecs .pcard:focus-within .pcard__img{
   border-color: rgba(0,0,0,0.75);
   transform: none !important;
+}
+
+.productHero__img{
+  width: 100%;
+  max-height: 460px;     /* mantiene el tamaño controlado */
+  object-fit: cover;    /* 🔑 acerca la imagen */
+  object-position: center;
+}
+
+.productHero{
+  padding: 10px;        /* antes 18px */
+}
+
+.productHero__img{
+  transform: scale(1.05);
+}
+
+/* ✅ Galería: UN SOLO CUADRO (hero grande + thumbs abajo) */
+.productPage__gallery{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+/* Imagen principal grande */
+.productHero{
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+.productHero__img{
+  width: 100%;
+  height: 420px;          /* ✅ tamaño “grande” */
+  object-fit: contain;
+}
+
+/* Thumbs abajo, dentro del mismo cuadro */
+.productThumbs{
+  margin-top: 12px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* cada miniatura */
+.productThumb{
+  width: 92px;
+  height: 92px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.10);
+  background: #fff;
+  cursor: pointer;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.productThumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.productThumb.is-active{
+  border-color: rgba(0,0,0,0.45);
+}
+
+/* ✅ GALERÍA CORRECTA: 1 CUADRO (hero grande + thumbs abajo) */
+.productPage__gallery{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+/* HERO grande */
+.productHero{
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Imagen principal GRANDE */
+.productHero__img{
+  width: 100%;
+  height: 420px;          /* podés subir a 480px si querés más grande */
+  object-fit: contain;
+}
+
+/* Miniaturas ABAJO dentro del mismo cuadro */
+.productThumbs{
+  margin-top: 12px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* Cuadraditos de miniaturas */
+.productThumb{
+  width: 92px;
+  height: 92px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.10);
+  background: #fff;
+  cursor: pointer;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.productThumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.productThumb.is-active{
+  border-color: rgba(0,0,0,0.45);
+}
+
+/* ✅ Galería: UN SOLO CUADRO (hero grande arriba + thumbs abajo) */
+.productPage__gallery{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 18px;
+  padding: 18px;
+
+  display: grid;
+  grid-template-rows: auto auto;   /* 🔑 hero arriba, thumbs abajo */
+  gap: 12px;
+  align-content: start;            /* 🔑 evita que se centre en vertical */
+}
+
+/* ✅ HERO grande */
+.productHero{
+  display: grid;
+  place-items: center;
+}
+
+/* Imagen principal */
+.productHero__img{
+  width: 100%;
+  height: 420px;          /* ✅ grande */
+  object-fit: contain;    /* no recorta */
+}
+
+/* ✅ Thumbs abajo, dentro del mismo cuadro */
+.productThumbs{
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;        /* por si hay más de 3 */
+  justify-content: flex-start;
+}
+
+/* cada miniatura */
+.productThumb{
+  width: 92px;
+  height: 92px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.10);
+  background: #fff;
+  cursor: pointer;
+  padding: 10px;
+
+  display: grid;
+  place-items: center;
+}
+
+.productThumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.productThumb.is-active{
+  border-color: rgba(0,0,0,0.45);
+}
+
+.productHero__img{ height: 480px; }
+
+/* ✅ OVERRIDE FINAL: producto con 1 solo cuadro (hero grande + thumbs abajo) */
+.productPage .productPage__gallery{
+  display: block !important;            /* 🔑 mata la grilla */
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+/* Hero grande */
+.productPage .productHero{
+  aspect-ratio: auto !important;        /* 🔑 mata el cuadrado */
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  display: grid;
+  place-items: center;
+}
+
+.productPage .productHero__img{
+  width: 100% !important;
+  height: 420px !important;             /* ✅ grande */
+  max-height: none !important;          /* 🔑 ignora max-height viejo */
+  object-fit: contain;
+}
+
+/* Thumbs abajo dentro del mismo cuadro */
+.productPage .productThumbs{
+  margin-top: 12px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+/* Miniaturas */
+.productPage .productThumb{
+  width: 92px;
+  height: 92px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.10);
+  background: #fff;
+  cursor: pointer;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.productPage .productThumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.productPage .productThumb.is-active{
+  border-color: rgba(0,0,0,0.45);
 }
