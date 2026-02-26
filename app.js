@@ -10,6 +10,7 @@ const LEGACY_PRODUCTS = [
     price: 511000,
     badge: "Notebooks",
     image: "media/products/notebook_lenovo.png",
+    image2: "media/products/notebook_lenovo2.png",
     description: "Notebook liviana para estudio y trabajo diario.",
     deal: true,
     discountPct: 18,
@@ -189,6 +190,7 @@ function normalizeLegacy(p) {
     oferta: !!p.deal,
     tag: p.badge,
     imagen: p.image,
+    imagen2: p.image2,
     descripcion: p.description || "Producto destacado (demo).",
     stockDisponible: typeof p.stockDisponible === "number" ? p.stockDisponible : undefined,
   };
@@ -1087,6 +1089,31 @@ function initProductDetail() {
 
   const escapeAttr = (s) => escapeHtml(s);
 
+
+  // ✅ Imágenes disponibles del producto (solo las que existan)
+  function getProductImages(p) {
+    const imgs = [];
+    const push = (v) => {
+      if (!v) return;
+      const s = String(v).trim();
+      if (!s) return;
+      if (!imgs.includes(s)) imgs.push(s);
+    };
+
+    // soporta: imagenes:[], imagen/imagen2..., y legacy image/image2...
+    if (Array.isArray(p.imagenes)) p.imagenes.forEach(push);
+
+    push(p.imagen);
+    push(p.imagen2);
+    push(p.imagen3);
+
+    push(p.image);
+    push(p.image2);
+    push(p.image3);
+
+    return imgs;
+  }
+
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id");
   const prod = BP_PRODUCTS.find((p) => p.id === id) || BP_PRODUCTS[0];
@@ -1108,20 +1135,25 @@ function initProductDetail() {
   const sku = `${(prod.marca || "BP").slice(0, 2).toUpperCase()}-${String(prod.id).toUpperCase()}`;
   const internalId = String(prod.id).slice(-5).toUpperCase();
 
+  const images = getProductImages(prod);
+  if (images.length === 0) images.push(prod.imagen);
+
   container.innerHTML = `
     <div class="productPage">
       <div class="productPage__gallery">
         <div class="productHero">
-          <img class="productHero__img" id="productHeroImg" src="${escapeAttr(prod.imagen)}" alt="${escapeAttr(prod.nombre)}" />
+          <img class="productHero__img" id="productHeroImg" src="${escapeAttr(images[0] || prod.imagen)}" alt="${escapeAttr(prod.nombre)}" />
         </div>
 
         <div class="productThumbs" id="productThumbs">
-          <button class="productThumb is-active" type="button" aria-label="Miniatura 1">
-            <img src="${escapeAttr(prod.imagen)}" alt="${escapeAttr(prod.nombre)}" />
-          </button>
-          <button class="productThumb" type="button" aria-label="Miniatura 2">
-            <img src="${escapeAttr(prod.imagen)}" alt="${escapeAttr(prod.nombre)}" />
-          </button>
+          ${images
+            .map(
+              (src, i) => `
+            <button class="productThumb ${i === 0 ? "is-active" : ""}" type="button" aria-label="Miniatura ${i + 1}">
+              <img src="${escapeAttr(src)}" alt="${escapeAttr(prod.nombre)}" />
+            </button>`
+            )
+            .join("")}
         </div>
       </div>
 
@@ -1164,7 +1196,7 @@ function initProductDetail() {
   const goCartBtn = document.getElementById("goCartBtn");
   if (goCartBtn) goCartBtn.addEventListener("click", () => (window.location.href = "carrito.html"));
 
-  // ✅ Galería simple (misma imagen x2 por ahora)
+  // ✅ Galería: usa solo las imágenes disponibles del producto
   const heroImg = document.getElementById("productHeroImg");
   const thumbs = document.getElementById("productThumbs");
 
