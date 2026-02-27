@@ -12,6 +12,13 @@ const LEGACY_PRODUCTS = [
     image: "media/products/notebook_lenovo.png",
     image2: "media/products/notebook_lenovo2.png",
     description: "Notebook liviana para estudio y trabajo diario.",
+    especificaciones: [
+        "Pantalla: 15.6\" (hasta Full HD)",
+        "Procesador: hasta Intel Core i7 (según configuración)",
+        "Memoria: hasta 12 GB DDR4 (según configuración)",
+        "Almacenamiento: SSD (según configuración)",
+        "Conectividad: Wi‑Fi, Bluetooth, HDMI"
+    ],
     deal: true,
     discountPct: 18,
     stockDisponible: 12
@@ -23,6 +30,13 @@ const LEGACY_PRODUCTS = [
     badge: "Monitores",
     image: "media/products/monitor_samsung.png",
     description: "Pantalla ideal para oficina y home office.",
+    especificaciones: [
+        "Pantalla: 24\" Full HD (1920×1080)",
+        "Panel: IPS",
+        "Frecuencia: hasta 75 Hz",
+        "Tiempo de respuesta: 5 ms (típico)",
+        "Conectividad: HDMI + D‑Sub (VGA)"
+    ],
     deal: false,
     stockDisponible: 20
   },
@@ -33,6 +47,13 @@ const LEGACY_PRODUCTS = [
     badge: "Periféricos",
     image: "media/products/teclado_mouse.png",
     description: "Combo inalámbrico cómodo y confiable.",
+    especificaciones: [
+        "Conexión: inalámbrica 2.4 GHz (USB)",
+        "Alcance: hasta 10 m",
+        "Teclado: tamaño completo + teclas multimedia",
+        "Mouse: óptico 1000 DPI",
+        "Compatibilidad: Windows / ChromeOS"
+    ],
     deal: true,
     discountPct: 35,
     stockDisponible: 15
@@ -44,6 +65,13 @@ const LEGACY_PRODUCTS = [
     badge: "Impresoras e Insumos",
     image: "media/products/impresora_hp.png",
     description: "Impresión y escaneo para el hogar.",
+    especificaciones: [
+        "Tipo: Multifunción (imprime / copia / escanea)",
+        "Tecnología: inyección térmica de tinta HP",
+        "Conectividad: Wi‑Fi + USB 2.0",
+        "Impresión móvil: AirPrint / HP Smart",
+        "Velocidad ISO: hasta 7.5 ppm negro / 5.5 ppm color"
+    ],
     deal: false,
     stockDisponible: 8
   },
@@ -54,6 +82,13 @@ const LEGACY_PRODUCTS = [
     badge: "Monitores",
     image: "media/products/monitor_lg.png",
     description: "Colores vivos y gran ángulo de visión.",
+    especificaciones: [
+        "Pantalla: 27\" Full HD (1920×1080)",
+        "Panel: IPS",
+        "Frecuencia: hasta 75 Hz (HDMI)",
+        "Entradas: HDMI + D‑Sub (VGA)",
+        "Extras: diseño casi sin bordes / modo lectura"
+    ],
     deal: true,
     discountPct: 22,
     stockDisponible: 9
@@ -65,6 +100,13 @@ const LEGACY_PRODUCTS = [
     badge: "Memorias",
     image: "media/products/ram_16gb.png",
     description: "Mejora el rendimiento de tu PC.",
+    especificaciones: [
+        "Capacidad: 16 GB",
+        "Tipo: DDR4 UDIMM (desktop) / 288 pines",
+        "Velocidad: 3200 MHz (PC4‑25600) típica",
+        "Voltaje: 1.35 V típica (según modelo)",
+        "Compatibilidad: plataformas DDR4"
+    ],
     deal: false,
     stockDisponible: 25
   },
@@ -75,6 +117,13 @@ const LEGACY_PRODUCTS = [
     badge: "Redes",
     image: "media/products/router_wifi6.png",
     description: "Más velocidad y mejor cobertura.",
+    especificaciones: [
+        "Estándar: Wi‑Fi 6 (802.11ax)",
+        "Doble banda: 5 GHz + 2.4 GHz",
+        "Velocidad: AX1800 (1201 Mbps + 574 Mbps)",
+        "Puertos: Gigabit Ethernet",
+        "Extras: beamforming / controles parentales (según modelo)"
+    ],
     deal: true,
     discountPct: 28,
     stockDisponible: 14
@@ -86,6 +135,13 @@ const LEGACY_PRODUCTS = [
     badge: "Electrodomésticos",
     image: "media/products/aspiradora.png",
     description: "Potente y liviana para el hogar.",
+    especificaciones: [
+        "Tipo: aspiradora compacta sin bolsa (ciclónica)",
+        "Potencia: 700 W (típico)",
+        "Depósito: 1.5 L (típico)",
+        "Filtro: lavable (según modelo)",
+        "Accesorios: boquilla multiuso (según modelo)"
+    ],
     deal: false,
     stockDisponible: 10
   },
@@ -192,6 +248,7 @@ function normalizeLegacy(p) {
     imagen: p.image,
     imagen2: p.image2,
     descripcion: p.description || "Producto destacado (demo).",
+    especificaciones: p.especificaciones,
     stockDisponible: typeof p.stockDisponible === "number" ? p.stockDisponible : undefined,
   };
 }
@@ -1104,6 +1161,68 @@ function initProductDetail() {
   const escapeAttr = (s) => escapeHtml(s);
 
 
+  // ✅ Inyecta (una sola vez) estilos para el cuadro de especificaciones
+  function ensureSpecsStyles(){
+    if (document.getElementById("bpSpecsStyle")) return;
+    const st = document.createElement("style");
+    st.id = "bpSpecsStyle";
+    st.textContent = `
+      .productSpecsBox{
+        max-width: 1240px;
+        margin: 0 auto 18px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.08);
+      }
+      .productSpecsBox__title{
+        margin: 0 0 10px;
+        font-weight: 950;
+        letter-spacing: -0.02em;
+        font-size: 16px;
+        color: rgba(0,0,0,0.86);
+      }
+      .productSpecsBox__grid{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 14px;
+      }
+      .productSpecsBox__item{
+        font-weight: 750;
+        color: rgba(0,0,0,0.72);
+        line-height: 1.35;
+        font-size: 13px;
+      }
+      @media (max-width: 900px){
+        .productSpecsBox{ margin: 0 var(--sides) 16px; }
+        .productSpecsBox__grid{ grid-template-columns: 1fr; }
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  function renderSpecsBox(prod){
+    ensureSpecsStyles();
+
+    let specs = prod && prod.especificaciones;
+    if (!specs) specs = [];
+    if (typeof specs === "string") specs = [specs];
+    if (!Array.isArray(specs)) specs = [];
+
+    const safeSpecs = specs.length ? specs : ["Especificaciones no disponibles para este producto."];
+
+    const box = document.createElement("div");
+    box.className = "productSpecsBox";
+    box.innerHTML = `
+      <h3 class="productSpecsBox__title">Especificaciones</h3>
+      <div class="productSpecsBox__grid">
+        ${safeSpecs.map((t)=>`<div class="productSpecsBox__item">• ${escapeHtml(t)}</div>`).join("")}
+      </div>
+    `;
+    return box;
+  }
+
+
   // ✅ Imágenes disponibles del producto (solo las que existan)
   function getProductImages(p) {
     const imgs = [];
@@ -1251,6 +1370,14 @@ function initProductDetail() {
       const img = btn.querySelector("img");
       if (img && img.src) heroImg.src = img.src;
     });
+  }
+
+  // ✅ Cuadro de especificaciones (arriba del carrusel)
+  const recSection = document.querySelector(".productRecsWrap") || document.getElementById("productRecs")?.closest("section");
+  if (recSection) {
+    const prev = recSection.querySelector(".productSpecsBox");
+    if (prev) prev.remove();
+    recSection.insertBefore(renderSpecsBox(prod), recSection.firstChild);
   }
 
   // ✅ Carrusel de recomendados (debajo del producto)
